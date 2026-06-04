@@ -20,7 +20,7 @@
 
   tasks:
     - name: Power off outlet {{ outlet_number }}
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"

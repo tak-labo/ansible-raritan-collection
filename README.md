@@ -1,4 +1,4 @@
-# raritan.xerus
+# tak_labo.raritan_xerus
 
 Ansible Collection for managing Raritan PDU and other devices.
 
@@ -10,7 +10,7 @@ Ansible Collection for managing Raritan PDU and other devices.
 
 ## Installation
 
-    ansible-galaxy collection install raritan.xerus
+    ansible-galaxy collection install tak_labo.raritan_xerus
 
 Install Python dependency:
 
@@ -20,16 +20,16 @@ Install Python dependency:
 
 | Module | Description |
 |---|---|
-| `raritan.xerus.datetime_config` | Configure NTP servers and timezone |
-| `raritan.xerus.dns_config` | Configure DNS server addresses, search suffixes, and IPv6 resolver preference |
-| `raritan.xerus.event_rule` | Manage event engine rules (bind actions to event conditions) |
-| `raritan.xerus.outlet_config` | Configure individual outlets and control power state (on/off/cycle) |
-| `raritan.xerus.pdu_config` | Configure PDU-wide settings (name, startup state, cycle delay) |
-| `raritan.xerus.pdu_facts` | Collect PDU facts (model, firmware, inlet sensors, outlet states) |
-| `raritan.xerus.snmp_config` | Configure SNMP v2/v3 settings |
-| `raritan.xerus.snmp_trap_action` | Manage SNMP trap event actions in the PDU event engine |
-| `raritan.xerus.syslog_action` | Manage syslog event actions in the PDU event engine |
-| `raritan.xerus.user_account` | Manage PDU user accounts with SNMPv3 settings (create/update/delete) |
+| `tak_labo.raritan_xerus.datetime_config` | Configure NTP servers and timezone |
+| `tak_labo.raritan_xerus.dns_config` | Configure DNS server addresses, search suffixes, and IPv6 resolver preference |
+| `tak_labo.raritan_xerus.event_rule` | Manage event engine rules (bind actions to event conditions) |
+| `tak_labo.raritan_xerus.outlet_config` | Configure individual outlets and control power state (on/off/cycle) |
+| `tak_labo.raritan_xerus.pdu_config` | Configure PDU-wide settings (name, startup state, cycle delay) |
+| `tak_labo.raritan_xerus.pdu_facts` | Collect PDU facts (model, firmware, inlet sensors, outlet states) |
+| `tak_labo.raritan_xerus.snmp_config` | Configure SNMP v2/v3 settings |
+| `tak_labo.raritan_xerus.snmp_trap_action` | Manage SNMP trap event actions in the PDU event engine |
+| `tak_labo.raritan_xerus.syslog_action` | Manage syslog event actions in the PDU event engine |
+| `tak_labo.raritan_xerus.user_account` | Manage PDU user accounts with SNMPv3 settings (create/update/delete) |
 
 All modules are idempotent and support `check_mode`. `pdu_facts` is read-only and always returns `changed=false`.
 

@@ -1,5 +1,5 @@
-namespace: raritan
-name: xerus
+namespace: tak_labo
+name: raritan_xerus
 version: 0.1.0
 readme: README.md
 description: Ansible Collection for managing Raritan devices
@@ -13,3 +13,6 @@ tags:
   - raritan
 dependencies: {}
 repository: https://github.com/tak-labo/ansible-raritan-collection
+homepage: https://github.com/tak-labo/ansible-raritan-collection
+issues: https://github.com/tak-labo/ansible-raritan-collection/issues
+documentation: https://github.com/tak-labo/ansible-raritan-collection/blob/main/README.md

@@ -1,4 +1,4 @@
-# raritan.xerus Ansible Collection — Design Spec
+# tak_labo.raritan_xerus Ansible Collection — Design Spec
 
 **Date:** 2026-06-04  
 **Updated:** 2026-06-04  
@@ -328,7 +328,7 @@ ANSIBLE_COLLECTIONS_PATH=/tmp/ansible_collections \
 
   tasks:
     - name: Set PDU name and cycle delay
-      raritan.xerus.pdu_config:
+      tak_labo.raritan_xerus.pdu_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -337,7 +337,7 @@ ANSIBLE_COLLECTIONS_PATH=/tmp/ansible_collections \
         cycle_delay: "{{ pdu_cycle_delay }}"
 
     - name: Configure NTP and timezone
-      raritan.xerus.datetime_config:
+      tak_labo.raritan_xerus.datetime_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"

@@ -14,7 +14,7 @@
 
   tasks:
     - name: Collect PDU facts
-      raritan.xerus.pdu_facts:
+      tak_labo.raritan_xerus.pdu_facts:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"

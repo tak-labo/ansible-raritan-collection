@@ -1,5 +1,5 @@
 ---
-# Integration test playbook for raritan.xerus collection
+# Integration test playbook for tak_labo.raritan_xerus collection
 #
 # Usage:
 #   cp examples/integration_test_vars.yml.example examples/vars.yml
@@ -9,7 +9,7 @@
 # Prerequisites: collection must be installed or ANSIBLE_COLLECTIONS_PATH set.
 #   pip install -r requirements.txt
 
-- name: Integration tests for raritan.xerus modules
+- name: Integration tests for tak_labo.raritan_xerus modules
   hosts: localhost
   gather_facts: false
   vars_files:
@@ -21,7 +21,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[pdu_config] apply test settings (establish known state)"
-      raritan.xerus.pdu_config:
+      tak_labo.raritan_xerus.pdu_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -31,7 +31,7 @@
       register: pdu_apply
 
     - name: "[pdu_config] check_mode - detect change with different value"
-      raritan.xerus.pdu_config:
+      tak_labo.raritan_xerus.pdu_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -46,7 +46,7 @@
         fail_msg: "check_mode should report changed but got: {{ pdu_check }}"
 
     - name: "[pdu_config] re-apply same settings (idempotency)"
-      raritan.xerus.pdu_config:
+      tak_labo.raritan_xerus.pdu_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -65,7 +65,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[outlet_config] set outlet name"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -75,7 +75,7 @@
       register: outlet_name_set
 
     - name: "[outlet_config] re-apply same outlet name (idempotency)"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -90,7 +90,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ outlet_name_idempotent }}"
 
     - name: "[outlet_config] power on"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -100,7 +100,7 @@
       register: outlet_on
 
     - name: "[outlet_config] power on again (idempotency)"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -115,7 +115,7 @@
         fail_msg: "Expected changed=false when outlet is already on, got: {{ outlet_on_idempotent }}"
 
     - name: "[outlet_config] power off"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -130,7 +130,7 @@
         fail_msg: "Expected changed=true when powering off, got: {{ outlet_off }}"
 
     - name: "[outlet_config] power off again (idempotency)"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -145,7 +145,7 @@
         fail_msg: "Expected changed=false when outlet is already off, got: {{ outlet_off_idempotent }}"
 
     - name: "[outlet_config] restore power on"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -154,7 +154,7 @@
         state: on
 
     - name: "[outlet_config] power cycle (always changed)"
-      raritan.xerus.outlet_config:
+      tak_labo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -173,7 +173,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[snmp_config] apply test settings (establish known state)"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -186,7 +186,7 @@
         write_community: "{{ snmp_v2_write_community_test }}"
 
     - name: "[snmp_config] check_mode with different value"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -201,7 +201,7 @@
         fail_msg: "check_mode should report changed but got: {{ snmp_check }}"
 
     - name: "[snmp_config] re-apply same settings (idempotency)"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -220,7 +220,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ snmp_idempotent }}"
 
     - name: "[snmp_config] change read_community"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -234,7 +234,7 @@
         fail_msg: "Expected changed=true on community change, got: {{ snmp_community_change }}"
 
     - name: "[snmp_config] restore read_community"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -242,7 +242,7 @@
         read_community: "{{ snmp_v2_read_community_test }}"
 
     - name: "[snmp_config] enable v3"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -256,7 +256,7 @@
         fail_msg: "Expected changed=true when enabling v3, got: {{ snmp_v3_enable }}"
 
     - name: "[snmp_config] enable v3 again (idempotency)"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -270,7 +270,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ snmp_v3_idempotent }}"
 
     - name: "[snmp_config] restore v3 disabled"
-      raritan.xerus.snmp_config:
+      tak_labo.raritan_xerus.snmp_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -282,7 +282,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[syslog_action] absent (pre-clean)"
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -291,7 +291,7 @@
         state: absent
 
     - name: "[syslog_action] create (state: present)"
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -308,7 +308,7 @@
         fail_msg: "Expected changed=true on create, got: {{ syslog_create }}"
 
     - name: "[syslog_action] re-apply same settings (idempotency)"
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -325,7 +325,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ syslog_idempotent }}"
 
     - name: "[syslog_action] update port"
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -342,7 +342,7 @@
         fail_msg: "Expected changed=true on port update, got: {{ syslog_update }}"
 
     - name: "[syslog_action] delete (state: absent)"
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -357,7 +357,7 @@
         fail_msg: "Expected changed=true on delete, got: {{ syslog_delete }}"
 
     - name: "[syslog_action] absent again (idempotency)"
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -376,7 +376,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[snmp_trap_action] absent (pre-clean)"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -385,7 +385,7 @@
         state: absent
 
     - name: "[snmp_trap_action] create"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -405,7 +405,7 @@
         fail_msg: "Expected changed=true on create, got: {{ snmp_trap_create }}"
 
     - name: "[snmp_trap_action] re-apply same settings (idempotency)"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -425,7 +425,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ snmp_trap_idempotent }}"
 
     - name: "[snmp_trap_action] update destination port"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -445,7 +445,7 @@
         fail_msg: "Expected changed=true on port update, got: {{ snmp_trap_update }}"
 
     - name: "[snmp_trap_action] delete (state: absent)"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -460,7 +460,7 @@
         fail_msg: "Expected changed=true on delete, got: {{ snmp_trap_delete }}"
 
     - name: "[snmp_trap_action] absent again (idempotency)"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -475,7 +475,7 @@
         fail_msg: "Expected changed=false when already absent, got: {{ snmp_trap_absent_idempotent }}"
 
     - name: "[snmp_trap_action] create with v3Trap"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -495,7 +495,7 @@
         fail_msg: "Expected changed=true for v3Trap create, got: {{ snmp_v3trap_create }}"
 
     - name: "[snmp_trap_action] v3Trap idempotency"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -515,7 +515,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ snmp_v3trap_idempotent }}"
 
     - name: "[snmp_trap_action] switch from v3Trap to v2Inform"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -535,7 +535,7 @@
         fail_msg: "Expected changed=true when switching notification_type, got: {{ snmp_v2inform }}"
 
     - name: "[snmp_trap_action] cleanup v3/v2Inform test action"
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -549,7 +549,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[event_rule] absent (pre-clean)"
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -558,7 +558,7 @@
         state: absent
 
     - name: "[event_rule] create"
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -578,7 +578,7 @@
         fail_msg: "Expected changed=true on create, got: {{ rule_create }}"
 
     - name: "[event_rule] re-apply same settings (idempotency)"
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -598,7 +598,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ rule_idempotent }}"
 
     - name: "[event_rule] update enabled=false"
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -618,7 +618,7 @@
         fail_msg: "Expected changed=true on update, got: {{ rule_update }}"
 
     - name: "[event_rule] delete (state: absent)"
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -633,7 +633,7 @@
         fail_msg: "Expected changed=true on delete, got: {{ rule_delete }}"
 
     - name: "[event_rule] absent again (idempotency)"
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -652,7 +652,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[user_account] pre-clean: delete test user if exists"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -661,7 +661,7 @@
         state: absent
 
     - name: "[user_account] create user with SNMPv3 enabled (state: present)"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -683,7 +683,7 @@
         fail_msg: "Expected changed=true on create, got: {{ v3_create }}"
 
     - name: "[user_account] re-apply same settings (idempotency)"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -704,7 +704,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ v3_idempotent }}"
 
     - name: "[user_account] change auth_protocol to sha512"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -721,7 +721,7 @@
         fail_msg: "Expected changed=true on auth_protocol update, got: {{ v3_update }}"
 
     - name: "[user_account] use_password_as_auth_passphrase=false with explicit auth_passphrase"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -739,7 +739,7 @@
         fail_msg: "Expected changed=true, got: {{ v3_auth_explicit }}"
 
     - name: "[user_account] re-apply use_password_as_auth_passphrase=false (flag idempotent)"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -755,7 +755,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ v3_auth_flag_idempotent }}"
 
     - name: "[user_account] use_auth_passphrase_as_priv_passphrase=false with explicit priv_passphrase"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -773,7 +773,7 @@
         fail_msg: "Expected changed=true, got: {{ v3_priv_explicit }}"
 
     - name: "[user_account] re-apply use_auth_passphrase_as_priv_passphrase=false (flag idempotent)"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -789,7 +789,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ v3_priv_flag_idempotent }}"
 
     - name: "[user_account] post-clean: delete test user (state: absent)"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -804,7 +804,7 @@
         fail_msg: "Expected changed=true on delete, got: {{ v3_delete }}"
 
     - name: "[user_account] absent again (idempotency)"
-      raritan.xerus.user_account:
+      tak_labo.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -823,7 +823,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[dns_config] get current DNS settings (baseline)"
-      raritan.xerus.dns_config:
+      tak_labo.raritan_xerus.dns_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -831,7 +831,7 @@
       register: dns_baseline
 
     - name: "[dns_config] apply test settings (establish known state)"
-      raritan.xerus.dns_config:
+      tak_labo.raritan_xerus.dns_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -842,7 +842,7 @@
       register: dns_apply
 
     - name: "[dns_config] re-apply same settings (idempotency)"
-      raritan.xerus.dns_config:
+      tak_labo.raritan_xerus.dns_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -858,7 +858,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ dns_idempotent }}"
 
     - name: "[dns_config] change servers only"
-      raritan.xerus.dns_config:
+      tak_labo.raritan_xerus.dns_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -872,7 +872,7 @@
         fail_msg: "Expected changed=true on servers update, got: {{ dns_servers_change }}"
 
     - name: "[dns_config] restore original DNS settings"
-      raritan.xerus.dns_config:
+      tak_labo.raritan_xerus.dns_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -885,7 +885,7 @@
     # datetime_config
     # -------------------------------------------------------------------------
     - name: "[datetime_config] save original settings"
-      raritan.xerus.datetime_config:
+      tak_labo.raritan_xerus.datetime_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -902,7 +902,7 @@
         fail_msg: "Expected changed=true on initial apply, got: {{ datetime_apply }}"
 
     - name: "[datetime_config] re-apply same settings (idempotency)"
-      raritan.xerus.datetime_config:
+      tak_labo.raritan_xerus.datetime_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -919,7 +919,7 @@
         fail_msg: "Expected changed=false on re-apply, got: {{ datetime_idempotent }}"
 
     - name: "[datetime_config] change ntp_server1"
-      raritan.xerus.datetime_config:
+      tak_labo.raritan_xerus.datetime_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -933,7 +933,7 @@
         fail_msg: "Expected changed=true on ntp_server1 update, got: {{ datetime_server_change }}"
 
     - name: "[datetime_config] restore original settings"
-      raritan.xerus.datetime_config:
+      tak_labo.raritan_xerus.datetime_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -946,7 +946,7 @@
     # -------------------------------------------------------------------------
 
     - name: "[pdu_facts] gather PDU facts"
-      raritan.xerus.pdu_facts:
+      tak_labo.raritan_xerus.pdu_facts:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"

@@ -20,7 +20,7 @@
 
   tasks:
     - name: Create syslog action
-      raritan.xerus.syslog_action:
+      tak_labo.raritan_xerus.syslog_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -31,7 +31,7 @@
         state: present
 
     - name: Create SNMP trap action
-      raritan.xerus.snmp_trap_action:
+      tak_labo.raritan_xerus.snmp_trap_action:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
@@ -45,7 +45,7 @@
         state: present
 
     - name: Create event rule (fire both actions on any event)
-      raritan.xerus.event_rule:
+      tak_labo.raritan_xerus.event_rule:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
