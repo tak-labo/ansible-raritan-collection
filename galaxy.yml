@@ -1,6 +1,6 @@
 namespace: tak_labo
 name: raritan_xerus
-version: 0.1.0
+version: 1.0.0
 readme: README.md
 description: Ansible Collection for managing Raritan devices
 license:
@@ -12,6 +12,19 @@ tags:
   - pdu
   - raritan
 dependencies: {}
+build_ignore:
+  - CLAUDE.md
+  - pyproject.toml
+  - uv.lock
+  - .gitignore
+  - '*.tar.gz'
+  - .venv
+  - .pytest_cache
+  - .claude
+  - docs
+  - tests
+  - examples
+  - playbooks/vars.yml
 repository: https://github.com/tak-labo/ansible-raritan-collection
 homepage: https://github.com/tak-labo/ansible-raritan-collection
 issues: https://github.com/tak-labo/ansible-raritan-collection/issues
