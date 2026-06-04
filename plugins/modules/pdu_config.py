@@ -4,7 +4,10 @@ module: pdu_config
 short_description: Configure Raritan PDU settings
 description:
   - Manages PDU-wide settings such as name, startup state, and cycle delay.
-  - Idempotent: only applies changes when current settings differ.
+  - Idempotent - only applies changes when current settings differ.
+version_added: "1.0.0"
+author:
+  - Takahiro Nagafuchi (@tak)
 options:
   host:
     description: PDU hostname or IP address.
@@ -35,6 +38,19 @@ options:
     type: int
 """
 
+EXAMPLES = r"""
+- name: Set PDU name and cycle delay
+  raritan.xerus.pdu_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    name: "Server Room PDU-1"
+    cycle_delay: 10
+"""
+
+RETURN = r"""# """
+
 import sys
 import os
 
@@ -50,9 +66,9 @@ from raritan.rpc import pdumodel
 PDU_TARGET = '/model/pdu/0'
 
 STARTUP_STATE_MAP = {
-    'on': 0,        # SS_ON
-    'off': 1,       # SS_OFF
-    'last_known': 2,  # SS_LAST_KNOWN_STATE
+    'on':         pdumodel.Pdu.StartupState.SS_ON,
+    'off':        pdumodel.Pdu.StartupState.SS_OFF,
+    'last_known': pdumodel.Pdu.StartupState.SS_LASTKNOWN,
 }
 
 

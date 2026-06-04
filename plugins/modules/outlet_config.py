@@ -6,6 +6,9 @@ description:
   - Manages individual outlet settings (name, startup state, cycle delay).
   - Controls outlet power state (on/off/cycle).
   - Settings management is idempotent. state=cycle always triggers a power cycle.
+version_added: "1.0.0"
+author:
+  - Takahiro Nagafuchi (@tak)
 options:
   host:
     description: PDU hostname or IP address.
@@ -48,6 +51,30 @@ options:
     type: bool
 """
 
+EXAMPLES = r"""
+- name: Power on outlet 3
+  raritan.xerus.outlet_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    outlet: 3
+    name: "Web Server"
+    state: on
+    startup_state: on
+
+- name: Power off outlet 5
+  raritan.xerus.outlet_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    outlet: 5
+    state: off
+"""
+
+RETURN = r"""# """
+
 import sys
 import os
 
@@ -63,15 +90,15 @@ from raritan.rpc import pdumodel
 PDU_TARGET = '/model/pdu/0'
 
 STARTUP_STATE_MAP = {
-    'on': 0,
-    'off': 1,
-    'last_known': 2,
+    'on':         pdumodel.Outlet.StartupState.SS_ON,
+    'off':        pdumodel.Outlet.StartupState.SS_OFF,
+    'last_known': pdumodel.Outlet.StartupState.SS_LASTKNOWN,
 }
 
 
 def run_module(module):
     p = module.params
-    outlet_num = p['outlet']  # 1始まり
+    outlet_num = p['outlet']
 
     try:
         agent = get_agent(
@@ -92,7 +119,7 @@ def run_module(module):
         module.fail_json(msg='Failed to get outlets: {}'.format(e))
         return
 
-    idx = outlet_num - 1  # 0始まりインデックスに変換
+    idx = outlet_num - 1
     if idx < 0 or idx >= len(outlets):
         module.fail_json(msg='Outlet {} not found (PDU has {} outlets)'.format(
             outlet_num, len(outlets)))

@@ -7,6 +7,9 @@ description:
   - Identified by action name. Idempotent for present/absent states.
   - state=present creates the action if missing or updates it if arguments differ.
   - state=absent removes the action if it exists.
+version_added: "1.0.0"
+author:
+  - Takahiro Nagafuchi (@tak)
 options:
   host:
     description: PDU hostname or IP address.
@@ -46,6 +49,30 @@ options:
     default: present
 """
 
+EXAMPLES = r"""
+- name: Add syslog action
+  raritan.xerus.syslog_action:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    name: "Alert to syslog"
+    server: 192.168.1.200
+    port: 514
+    state: present
+
+- name: Delete syslog action
+  raritan.xerus.syslog_action:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    name: "Alert to syslog"
+    state: absent
+"""
+
+RETURN = r"""# """
+
 import sys
 import os
 
@@ -58,7 +85,7 @@ except ImportError:
 
 from raritan.rpc import event
 
-ENGINE_TARGET = '/engine'
+ENGINE_TARGET = '/event_engine'
 ACTION_TYPE = 'syslog'
 
 # Argument key names passed to the PDU — verify via engine.listActionTypes() on a real device.

@@ -16,11 +16,12 @@ def make_module(params):
     return m
 
 
-def make_settings(name='PDU', startup_state_val=0, cycle_delay=0):
+def make_settings(name='PDU', startup_state_val=None, cycle_delay=0):
     """pdumodel.Pdu.Settings 風の mock を返す。"""
+    from raritan.rpc import pdumodel as pm
     s = MagicMock()
     s.name = name
-    s.startupState = startup_state_val  # SS_ON=0
+    s.startupState = startup_state_val if startup_state_val is not None else pm.Pdu.StartupState.SS_ON
     s.cycleDelay = cycle_delay
     return s
 

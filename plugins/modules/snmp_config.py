@@ -4,7 +4,10 @@ module: snmp_config
 short_description: Configure Raritan PDU SNMP settings
 description:
   - Manages SNMP v2/v3 settings such as community strings and system information.
-  - Idempotent: only applies changes when current settings differ.
+  - Idempotent - only applies changes when current settings differ.
+version_added: "1.0.0"
+author:
+  - Takahiro Nagafuchi (@tak)
 options:
   host:
     description: PDU hostname or IP address.
@@ -32,6 +35,7 @@ options:
   read_community:
     description: SNMP v2 read community string.
     type: str
+    no_log: true
   write_community:
     description: SNMP v2 write community string.
     type: str
@@ -47,6 +51,20 @@ options:
     type: str
 """
 
+EXAMPLES = r"""
+- name: Configure SNMP
+  raritan.xerus.snmp_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    v2_enabled: true
+    read_community: public
+    sys_location: "Server Room"
+"""
+
+RETURN = r"""# """
+
 import sys
 import os
 
@@ -59,7 +77,7 @@ except ImportError:
 
 from raritan.rpc import devsettings
 
-SNMP_TARGET = '/device/snmp'
+SNMP_TARGET = '/snmp'
 
 FIELD_MAP = [
     ('v2_enabled',      'v2enable'),
@@ -120,7 +138,7 @@ def main():
             validate_certs=dict(type='bool', default=True),
             v2_enabled=dict(type='bool'),
             v3_enabled=dict(type='bool'),
-            read_community=dict(type='str'),
+            read_community=dict(type='str', no_log=True),
             write_community=dict(type='str', no_log=True),
             sys_contact=dict(type='str'),
             sys_name=dict(type='str'),

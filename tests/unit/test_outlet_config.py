@@ -26,10 +26,11 @@ def base_params(**overrides):
     return p
 
 
-def make_outlet_settings(name='Outlet 2', startup_state=0, cycle_delay=0, non_critical=False):
+def make_outlet_settings(name='Outlet 2', startup_state=None, cycle_delay=0, non_critical=False):
+    from raritan.rpc import pdumodel as pm
     s = MagicMock()
     s.name = name
-    s.startupState = startup_state
+    s.startupState = startup_state if startup_state is not None else pm.Outlet.StartupState.SS_ON
     s.cycleDelay = cycle_delay
     s.nonCritical = non_critical
     return s
