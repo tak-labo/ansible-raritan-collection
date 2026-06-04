@@ -6,10 +6,10 @@ description: Ansible Collection for managing Raritan devices
 license:
   - MIT
 authors:
-  - Your Name
+  - Takahiro Nagafuchi
 tags:
   - networking
   - pdu
   - raritan
 dependencies: {}
-repository: ""
+repository: https://github.com/tak-labo/ansible-raritan-collection

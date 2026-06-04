@@ -1,0 +1,52 @@
+---
+# Display PDU hardware information and current sensor readings.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/pdu_facts.yml
+
+- name: Show PDU information
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Collect PDU facts
+      raritan.xerus.pdu_facts:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+
+    - name: Show hardware identification
+      ansible.builtin.debug:
+        msg:
+          - "Model:    {{ ansible_facts.pdu.model }}"
+          - "Serial:   {{ ansible_facts.pdu.serial_number }}"
+          - "Firmware: {{ ansible_facts.pdu.firmware }}"
+          - "MAC:      {{ ansible_facts.pdu.mac_address }}"
+          - "Name:     {{ ansible_facts.pdu.name }}"
+
+    - name: Show inlet readings
+      ansible.builtin.debug:
+        msg: >-
+          Inlet {{ item.index }}:
+          {{ item.voltage_v }} V,
+          {{ item.current_a }} A,
+          {{ item.active_power_w }} W
+      loop: "{{ ansible_facts.pdu.inlets }}"
+      loop_control:
+        label: "inlet {{ item.index }}"
+
+    - name: Show outlet states
+      ansible.builtin.debug:
+        msg: >-
+          Outlet {{ item.number }} [{{ item.name | default('(unnamed)') }}]:
+          {{ item.power_state }},
+          {{ item.current_a }} A,
+          {{ item.active_power_w }} W
+      loop: "{{ ansible_facts.pdu.outlets }}"
+      loop_control:
+        label: "outlet {{ item.number }}"

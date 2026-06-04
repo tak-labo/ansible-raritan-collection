@@ -1,2 +1,7 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "ansible>=14.0.0",
+]

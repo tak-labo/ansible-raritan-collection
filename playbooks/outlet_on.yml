@@ -1,0 +1,29 @@
+---
+# Power on a specific outlet.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/outlet_on.yml
+#
+# You will be prompted for the outlet number.
+
+- name: Power on outlet
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  vars_prompt:
+    - name: outlet_number
+      prompt: "Outlet number to power on"
+      private: false
+
+  tasks:
+    - name: Power on outlet {{ outlet_number }}
+      raritan.xerus.outlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        outlet: "{{ outlet_number | int }}"
+        state: on

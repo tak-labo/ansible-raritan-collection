@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+uv.lock
+examples/integration_test_vars.yml
+playbooks/vars.yml
+dist/
+*.tar.gz

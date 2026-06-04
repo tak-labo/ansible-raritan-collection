@@ -1,0 +1,41 @@
+---
+# Create or update a PDU user account with SNMPv3 enabled.
+# Uses auth_priv security level with SHA-256 authentication and AES-128 encryption.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/snmpv3_user.yml
+#
+# You will be prompted for the target username and password.
+
+- name: Create SNMPv3 user
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  vars_prompt:
+    - name: target_user
+      prompt: "Username to create"
+      private: false
+    - name: new_password
+      prompt: "Password for the user"
+      private: true
+      confirm: true
+
+  tasks:
+    - name: Create user {{ target_user }} with SNMPv3
+      raritan.xerus.user_account:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        target_user: "{{ target_user }}"
+        new_password: "{{ new_password }}"
+        snmp_v3_enabled: true
+        sec_level: auth_priv
+        auth_protocol: sha256
+        priv_protocol: aes128
+        use_password_as_auth_passphrase: true
+        use_auth_passphrase_as_priv_passphrase: true
+        state: present

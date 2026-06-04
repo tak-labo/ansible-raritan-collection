@@ -1,0 +1,59 @@
+---
+# Configure event monitoring: syslog action + SNMP trap action + event rule.
+# All three tasks are idempotent — safe to run multiple times.
+#
+# This playbook wires up:
+#   1. A syslog action that sends events to a syslog server
+#   2. An SNMP trap action that sends traps to an NMS
+#   3. An event rule that fires both actions on every PDU event
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host/user/pass and syslog/snmp variables
+#   ansible-playbook playbooks/monitoring_setup.yml
+
+- name: Set up PDU event monitoring
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create syslog action
+      raritan.xerus.syslog_action:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        name: "{{ syslog_action_name }}"
+        server: "{{ syslog_server }}"
+        port: "{{ syslog_port }}"
+        state: present
+
+    - name: Create SNMP trap action
+      raritan.xerus.snmp_trap_action:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        name: "{{ snmp_trap_action_name }}"
+        notification_type: v2Trap
+        destinations:
+          - host: "{{ snmp_trap_dest_host }}"
+            port: 162
+            community: "{{ snmp_read_community }}"
+        state: present
+
+    - name: Create event rule (fire both actions on any event)
+      raritan.xerus.event_rule:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        name: "{{ event_rule_name }}"
+        action_names:
+          - "{{ syslog_action_name }}"
+          - "{{ snmp_trap_action_name }}"
+        event_id: ["**"]
+        match_type: both
+        state: present

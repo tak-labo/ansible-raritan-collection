@@ -1,0 +1,51 @@
+---
+# Variables for playbooks — copy to vars.yml and fill in your credentials.
+pdu_host: "192.168.1.100"
+pdu_user: "admin"
+pdu_pass: "changeme"
+validate_certs: false
+
+# PDU-wide settings
+pdu_name: "Server Room PDU-1"
+pdu_cycle_delay: 10
+
+# Outlets to configure (1-based index)
+outlet_web: 1
+outlet_db: 2
+outlet_spare: 3
+
+# SNMP settings
+snmp_v2_enabled: true
+snmp_read_community: "public"
+snmp_write_community: "private"
+snmp_sys_name: "pdu-01"
+snmp_sys_location: "Server Room"
+snmp_sys_contact: "ops@example.com"
+
+# Syslog action
+syslog_action_name: "Syslog to NMS"
+syslog_server: "192.168.1.200"
+syslog_port: 514
+
+# SNMP trap action
+snmp_trap_action_name: "SNMP Trap to NMS"
+snmp_trap_dest_host: "192.168.1.200"
+
+# Event rule
+event_rule_name: "All events to NMS"
+
+# DNS settings
+dns_servers:
+  - "8.8.8.8"
+  - "8.8.4.4"
+dns_search_suffixes:
+  - "example.com"
+
+# NTP / timezone
+timezone: "(UTC+09:00) Osaka, Sapporo, Tokyo"
+ntp_server1: "pool.ntp.org"
+ntp_server2: ""
+
+# User account (SNMPv3)
+target_user: "snmpuser"
+user_password: "Passw0rd!"

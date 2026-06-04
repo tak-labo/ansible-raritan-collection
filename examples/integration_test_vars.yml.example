@@ -1,0 +1,57 @@
+---
+# Template for integration test variables.
+# Copy to vars.yml and fill in your PDU credentials before running integration_test.yml.
+pdu_host: "192.168.x.x"
+pdu_user: "admin"
+pdu_pass: "changeme"
+validate_certs: false
+
+# Test target outlet (1-based index)
+test_outlet: 1
+test_outlet_name: "Integration Test Outlet"
+
+# PDU settings used during test (will be restored after)
+pdu_name_test: "Integration Test PDU"
+pdu_cycle_delay_test: 5
+pdu_name_check_mode: "Check Mode PDU"  # different from pdu_name_test — used only for check_mode assertion
+
+# snmp_config test values
+snmp_sys_name_test: "Integration Test PDU"
+snmp_sys_location_test: "Test Lab"
+snmp_sys_contact_test: "test@example.com"
+snmp_v2_read_community_test: "public"
+snmp_v2_write_community_test: "private"
+
+# syslog_action test values
+syslog_action_name_test: "Integration Test Syslog"
+syslog_server_test: "192.168.1.200"
+syslog_port_test: 514
+
+# snmp_trap_action test values
+snmp_trap_action_name_test: "Integration Test SNMP Trap"
+snmp_trap_dest_host_test: "192.168.1.200"
+
+# event_rule test values
+event_rule_name_test: "Integration Test Rule"
+
+# user_account test values
+snmp_v3_target_user: "snmptest"          # dedicated test user (created/deleted by test)
+snmp_v3_initial_password: "Passw0rd!"   # initial password for test user creation
+snmp_v3_new_password: "Passw0rd2!"      # new password set during first SNMPv3 update
+snmp_v3_new_password2: "Passw0rd3!"     # new password set during second SNMPv3 update
+snmp_v3_new_password3: "Passw0rd4!"     # new password for use_password_as_auth_passphrase=false test
+snmp_v3_auth_passphrase_test: "AuthPass1!"   # explicit auth passphrase for false-flag test
+snmp_v3_priv_passphrase_test: "PrivPass1!"   # explicit priv passphrase for false-flag test
+
+# dns_config test values
+dns_servers_test: ["192.168.1.1", "192.168.1.2"]
+dns_servers_test2: ["8.8.8.8"]
+dns_search_suffixes_test: ["example.com"]
+dns_prefer_ipv6_test: false
+
+# datetime_config test values
+datetime_timezone_test: "(UTC+09:00) Osaka, Sapporo, Tokyo"
+datetime_protocol_test: "ntp"
+datetime_ntp_server1_test: "ntp.nict.go.jp"
+datetime_ntp_server2_test: ""
+datetime_ntp_server1_alt_test: "time.cloudflare.com"
