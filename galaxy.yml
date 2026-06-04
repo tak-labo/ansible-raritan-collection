@@ -1,0 +1,15 @@
+namespace: raritan
+name: xerus
+version: 0.1.0
+readme: README.md
+description: Ansible Collection for managing Raritan devices
+license:
+  - MIT
+authors:
+  - Your Name
+tags:
+  - networking
+  - pdu
+  - raritan
+dependencies: {}
+repository: ""
