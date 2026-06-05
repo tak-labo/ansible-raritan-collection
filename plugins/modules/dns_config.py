@@ -42,7 +42,7 @@ options:
 
 EXAMPLES = r"""
 - name: Configure DNS servers
-  tak_labo.raritan_xerus.dns_config:
+  tak_55.raritan_xerus.dns_config:
     host: 192.168.1.100
     username: admin
     password: secret
@@ -62,7 +62,7 @@ import os
 
 try:
     from ansible.module_utils.basic import AnsibleModule
-    from ansible_collections.tak_labo.raritan_xerus.plugins.module_utils.raritan_client import get_agent, RaritanClientError
+    from ansible_collections.tak_55.raritan_xerus.plugins.module_utils.raritan_client import get_agent, RaritanClientError
 except ImportError:
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../module_utils'))
     from raritan_client import get_agent, RaritanClientError

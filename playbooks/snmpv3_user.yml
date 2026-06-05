@@ -25,7 +25,7 @@
 
   tasks:
     - name: Create user {{ target_user }} with SNMPv3
-      tak_labo.raritan_xerus.user_account:
+      tak_55.raritan_xerus.user_account:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
