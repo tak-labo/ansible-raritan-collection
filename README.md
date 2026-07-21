@@ -166,8 +166,9 @@ Returns `ansible_facts.pdu` with the following keys:
 | `name` | str | yes | Action name (used as idempotency key) |
 | `server` | str | no | Syslog server hostname or IP address |
 | `port` | int | no (default: 514) | Syslog server UDP port |
-| `message_format` | str | no | Syslog message format string |
 | `state` | str | no (default: present) | `present` to create/update, `absent` to delete |
+
+Sends syslog messages over UDP only (TCP/TLS are not exposed as module options). Actions created before this fix used an invalid `type` (`'syslog'` instead of `'SendSyslogMessage'`); since `modifyAction` may not update `type` on existing actions, delete (`state: absent`) and recreate any action created with an older version of this module.
 
 ### user_account
 
