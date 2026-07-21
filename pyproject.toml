@@ -4,4 +4,6 @@ testpaths = ["tests"]
 [dependency-groups]
 dev = [
     "ansible>=14.0.0",
+    "pytest>=8.0.0",
+    "raritan>=4.3.0",
 ]
