@@ -39,9 +39,6 @@ options:
     description: Syslog server UDP port.
     type: int
     default: 514
-  message_format:
-    description: Syslog message format string.
-    type: str
   state:
     description: Whether the action should exist.
     type: str
@@ -86,14 +83,21 @@ except ImportError:
 from raritan.rpc import event
 
 ENGINE_TARGET = '/event_engine'
-ACTION_TYPE = 'syslog'
+ACTION_TYPE = 'SendSyslogMessage'
 
-# Argument key names passed to the PDU — verify via engine.listActionTypes() on a real device.
-# If keys differ, update this mapping (syslog_action.py is the only place to change).
+# Verified against engine.listActionTypes() and the JSON-RPC docs on real hardware
+# (PX3-5138JR). Keys are PascalCase with a "SyslogServer" prefix, not the camelCase
+# names used elsewhere in this collection.
 SYSLOG_ARG_KEYS = {
-    'server':         'serverName',
-    'port':           'serverPort',
-    'message_format': 'messageFormat',
+    'server': 'SyslogServerName',
+    'port':   'SyslogServerPort',
+}
+
+# Module only supports UDP syslog; these are required alongside SyslogServerName/Port.
+SYSLOG_STATIC_ARGS = {
+    'SyslogServerUseTcp':     '0',
+    'SyslogServerUseTls':     '0',
+    'SyslogServerNoBsdCompat': '0',
 }
 
 
@@ -103,6 +107,8 @@ def _build_arguments(p, kv_class):
         val = p.get(param_key)
         if val is not None:
             args.append(kv_class(key=arg_key, value=str(val)))
+    for arg_key, val in SYSLOG_STATIC_ARGS.items():
+        args.append(kv_class(key=arg_key, value=val))
     return args
 
 
@@ -200,7 +206,6 @@ def main():
             name=dict(type='str', required=True),
             server=dict(type='str'),
             port=dict(type='int', default=514),
-            message_format=dict(type='str'),
             state=dict(type='str', choices=['present', 'absent'], default='present'),
         ),
         supports_check_mode=True,

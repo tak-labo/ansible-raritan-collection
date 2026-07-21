@@ -22,7 +22,6 @@ def base_params(**overrides):
         'name': 'Test Syslog',
         'server': '192.168.1.200',
         'port': 514,
-        'message_format': '%m',
         'state': 'present',
     }
     p.update(overrides)
@@ -37,16 +36,18 @@ def make_kv(key, value):
 
 
 def make_action(name='Test Syslog', server='192.168.1.200', port='514',
-                msg_fmt='%m', action_id='act-1'):
+                action_id='act-1'):
     a = MagicMock()
     a.id = action_id
     a.name = name
-    a.type = 'syslog'
+    a.type = 'SendSyslogMessage'
     a.isSystem = False
     a.arguments = [
-        make_kv('serverName', server),
-        make_kv('serverPort', str(port)),
-        make_kv('messageFormat', msg_fmt),
+        make_kv('SyslogServerName', server),
+        make_kv('SyslogServerPort', str(port)),
+        make_kv('SyslogServerUseTcp', '0'),
+        make_kv('SyslogServerUseTls', '0'),
+        make_kv('SyslogServerNoBsdCompat', '0'),
     ]
     return a
 
@@ -58,6 +59,7 @@ class TestSyslogAction:
         mock_event.Engine.return_value = mock_engine
         mock_engine.listActions.return_value = existing_actions or []
         mock_event.KeyValue.side_effect = make_kv
+        mock_event.Engine.Action.side_effect = lambda **kw: MagicMock(**kw)
         return mock_engine
 
     def test_create_when_not_exists(self):
@@ -68,12 +70,14 @@ class TestSyslogAction:
             engine.addAction.return_value = (0, 'new-id')
             syslog_action.run_module(module)
         engine.addAction.assert_called_once()
+        added_action = engine.addAction.call_args[0][0]
+        assert added_action.type == 'SendSyslogMessage'
         module.exit_json.assert_called_once_with(changed=True)
 
     def test_no_change_when_exists_and_matches(self):
         module = make_module(base_params())
         existing = make_action(name='Test Syslog', server='192.168.1.200',
-                               port='514', msg_fmt='%m')
+                               port='514')
         with patch('syslog_action.get_agent') as mga, \
              patch('syslog_action.event') as mev:
             engine = self._setup(mga, mev, existing_actions=[existing])
