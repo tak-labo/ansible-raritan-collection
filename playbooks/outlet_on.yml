@@ -20,7 +20,7 @@
 
   tasks:
     - name: Power on outlet {{ outlet_number }}
-      tak_55.raritan_xerus.outlet_config:
+      taklabo.raritan_xerus.outlet_config:
         host: "{{ pdu_host }}"
         username: "{{ pdu_user }}"
         password: "{{ pdu_pass }}"
