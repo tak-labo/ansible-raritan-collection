@@ -49,6 +49,52 @@ options:
   non_critical:
     description: Exclude outlet from load shedding.
     type: bool
+  sensor:
+    description: Sensor to configure thresholds for. Required when any threshold option is set.
+    type: str
+    choices:
+      - voltage
+      - current
+      - peak_current
+      - maximum_current
+      - unbalanced_current
+      - active_power
+      - reactive_power
+      - apparent_power
+      - power_factor
+      - displacement_power_factor
+      - active_energy
+      - apparent_energy
+      - phase_angle
+      - line_frequency
+      - crest_factor
+      - voltage_thd
+      - current_thd
+      - inrush_current
+  upper_critical:
+    description: Upper critical threshold value. Setting it also enables it.
+    type: float
+  upper_warning:
+    description: Upper warning threshold value. Setting it also enables it.
+    type: float
+  lower_warning:
+    description: Lower warning threshold value. Setting it also enables it.
+    type: float
+  lower_critical:
+    description: Lower critical threshold value. Setting it also enables it.
+    type: float
+  unset_thresholds:
+    description: >-
+      Threshold fields to disable (clears the corresponding *Active flag without
+      changing the stored value). Requires C(sensor) when set. A field must not
+      appear here and as a value option at the same time.
+    type: list
+    elements: str
+    choices:
+      - upper_critical
+      - upper_warning
+      - lower_warning
+      - lower_critical
 """
 
 EXAMPLES = r"""
@@ -71,6 +117,28 @@ EXAMPLES = r"""
     validate_certs: false
     outlet: 5
     state: off
+
+- name: Set current upper thresholds on outlet 3
+  taklabo.raritan_xerus.outlet_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    outlet: 3
+    sensor: current
+    upper_warning: 12.0
+    upper_critical: 15.0
+
+- name: Disable current upper_warning threshold on outlet 3
+  taklabo.raritan_xerus.outlet_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    outlet: 3
+    sensor: current
+    unset_thresholds:
+      - upper_warning
 """
 
 RETURN = r"""# """
@@ -95,10 +163,50 @@ STARTUP_STATE_MAP = {
     'last_known': pdumodel.Outlet.StartupState.SS_LASTKNOWN,
 }
 
+SENSOR_MAP = {
+    'voltage': 'voltage',
+    'current': 'current',
+    'peak_current': 'peakCurrent',
+    'maximum_current': 'maximumCurrent',
+    'unbalanced_current': 'unbalancedCurrent',
+    'active_power': 'activePower',
+    'reactive_power': 'reactivePower',
+    'apparent_power': 'apparentPower',
+    'power_factor': 'powerFactor',
+    'displacement_power_factor': 'displacementPowerFactor',
+    'active_energy': 'activeEnergy',
+    'apparent_energy': 'apparentEnergy',
+    'phase_angle': 'phaseAngle',
+    'line_frequency': 'lineFrequency',
+    'crest_factor': 'crestFactor',
+    'voltage_thd': 'voltageThd',
+    'current_thd': 'currentThd',
+    'inrush_current': 'inrushCurrent',
+}
+
+THRESHOLD_FIELDS = {
+    'upper_critical': ('upperCritical', 'upperCriticalActive'),
+    'upper_warning': ('upperWarning', 'upperWarningActive'),
+    'lower_warning': ('lowerWarning', 'lowerWarningActive'),
+    'lower_critical': ('lowerCritical', 'lowerCriticalActive'),
+}
+
 
 def run_module(module):
     p = module.params
     outlet_num = p['outlet']
+
+    unset_thresholds = p.get('unset_thresholds') or []
+
+    overlap = [f for f in unset_thresholds if p.get(f) is not None]
+    if overlap:
+        module.fail_json(msg='{} cannot be set and unset at the same time'.format(', '.join(overlap)))
+        return
+
+    threshold_params_given = any(p.get(f) is not None for f in THRESHOLD_FIELDS) or bool(unset_thresholds)
+    if threshold_params_given and p.get('sensor') is None:
+        module.fail_json(msg='sensor is required when a threshold option is set')
+        return
 
     try:
         agent = get_agent(
@@ -191,7 +299,44 @@ def run_module(module):
                     return
             power_changed = True
 
-    module.exit_json(changed=settings_changed or power_changed)
+    thresholds_changed = False
+
+    if p.get('sensor') is not None:
+        try:
+            sensors = outlet.getSensors()
+            sensor = getattr(sensors, SENSOR_MAP[p['sensor']])
+        except Exception as e:
+            module.fail_json(msg='Failed to get sensor {}: {}'.format(p['sensor'], e))
+            return
+
+        try:
+            thresholds = sensor.getThresholds()
+        except Exception as e:
+            module.fail_json(msg='Failed to get thresholds: {}'.format(e))
+            return
+
+        for param_name, (value_attr, active_attr) in THRESHOLD_FIELDS.items():
+            value = p.get(param_name)
+            if value is not None and (getattr(thresholds, value_attr) != value
+                                       or not getattr(thresholds, active_attr)):
+                setattr(thresholds, value_attr, value)
+                setattr(thresholds, active_attr, True)
+                thresholds_changed = True
+            elif param_name in unset_thresholds and getattr(thresholds, active_attr):
+                setattr(thresholds, active_attr, False)
+                thresholds_changed = True
+
+        if thresholds_changed and not module.check_mode:
+            try:
+                rc = sensor.setThresholds(thresholds)
+            except Exception as e:
+                module.fail_json(msg='Failed to set thresholds: {}'.format(e))
+                return
+            if rc != 0:
+                module.fail_json(msg='Failed to set thresholds: rc={}'.format(rc))
+                return
+
+    module.exit_json(changed=settings_changed or power_changed or thresholds_changed)
 
 
 def main():
@@ -208,6 +353,12 @@ def main():
             startup_state=dict(type='str', choices=['on', 'off', 'last_known']),
             cycle_delay=dict(type='int'),
             non_critical=dict(type='bool'),
+            sensor=dict(type='str', choices=list(SENSOR_MAP.keys())),
+            upper_critical=dict(type='float'),
+            upper_warning=dict(type='float'),
+            lower_warning=dict(type='float'),
+            lower_critical=dict(type='float'),
+            unset_thresholds=dict(type='list', elements='str', choices=list(THRESHOLD_FIELDS.keys())),
         ),
         supports_check_mode=True,
     )

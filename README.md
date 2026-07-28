@@ -94,6 +94,7 @@ Server and suffix lists are compared order-insensitively.
 | `upper_warning` | float | no | Upper warning threshold value. Setting it also enables it |
 | `lower_warning` | float | no | Lower warning threshold value. Setting it also enables it |
 | `lower_critical` | float | no | Lower critical threshold value. Setting it also enables it |
+| `unset_thresholds` | list[str] | no | Threshold fields to disable (`upper_critical`/`upper_warning`/`lower_warning`/`lower_critical`). Requires `sensor`. A field can't be set and unset at the same time |
 
 ### outlet_config
 
@@ -109,8 +110,14 @@ Server and suffix lists are compared order-insensitively.
 | `startup_state` | str | no | Power state on PDU startup (`on` / `off` / `last_known`) |
 | `cycle_delay` | int | no | Power cycle delay in seconds |
 | `non_critical` | bool | no | Exclude outlet from load shedding |
+| `sensor` | str | no | Sensor to configure thresholds for (`voltage`, `current`, `active_power`, etc.). Required when any threshold option is set |
+| `upper_critical` | float | no | Upper critical threshold value. Setting it also enables it |
+| `upper_warning` | float | no | Upper warning threshold value. Setting it also enables it |
+| `lower_warning` | float | no | Lower warning threshold value. Setting it also enables it |
+| `lower_critical` | float | no | Lower critical threshold value. Setting it also enables it |
+| `unset_thresholds` | list[str] | no | Threshold fields to disable (`upper_critical`/`upper_warning`/`lower_warning`/`lower_critical`). Requires `sensor`. A field can't be set and unset at the same time |
 
-`state: cycle` always reports `changed: true`.
+`state: cycle` always reports `changed: true`. Outlet sensors don't include the residual-current/three-phase-imbalance sensors available on inlets (see `SENSOR_MAP` in `plugins/modules/outlet_config.py` for the full list).
 
 ### pdu_config
 
