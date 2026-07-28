@@ -22,6 +22,7 @@ def base_params(**overrides):
         'name': None,
         'sensor': None, 'upper_critical': None, 'upper_warning': None,
         'lower_warning': None, 'lower_critical': None,
+        'unset_thresholds': None,
     }
     p.update(overrides)
     return p
@@ -174,3 +175,49 @@ class TestInletConfig:
 
         sensors[1].setThresholds.assert_not_called()
         module.exit_json.assert_called_once_with(changed=True)
+
+    def test_unset_threshold_clears_active_flag(self):
+        module = make_module(base_params(sensor='voltage', unset_thresholds=['upper_warning']))
+        with patch('inlet_config.get_agent') as mga, \
+             patch('inlet_config.pdumodel') as mpm:
+            pdu, inlets, sensors = self._setup_mocks(mga, mpm,
+                sensor_thresholds=make_thresholds(upper_warning=240.0),
+                sensor_name='voltage')
+            inlet_config.run_module(module)
+
+        thresh_arg = sensors[1].setThresholds.call_args[0][0]
+        assert thresh_arg.upperWarningActive is False
+        module.exit_json.assert_called_once_with(changed=True)
+
+    def test_unset_already_inactive_threshold_is_noop(self):
+        module = make_module(base_params(sensor='voltage', unset_thresholds=['upper_warning']))
+        with patch('inlet_config.get_agent') as mga, \
+             patch('inlet_config.pdumodel') as mpm:
+            pdu, inlets, sensors = self._setup_mocks(mga, mpm,
+                sensor_thresholds=make_thresholds(),
+                sensor_name='voltage')
+            inlet_config.run_module(module)
+
+        sensors[1].setThresholds.assert_not_called()
+        module.exit_json.assert_called_once_with(changed=False)
+
+    def test_set_and_unset_same_field_fails(self):
+        module = make_module(base_params(
+            sensor='voltage', upper_warning=240.0, unset_thresholds=['upper_warning']))
+        with patch('inlet_config.get_agent') as mga, \
+             patch('inlet_config.pdumodel') as mpm:
+            self._setup_mocks(mga, mpm, sensor_name='voltage')
+            inlet_config.run_module(module)
+
+        module.fail_json.assert_called_once()
+        assert 'upper_warning' in module.fail_json.call_args[1]['msg']
+
+    def test_unset_threshold_without_sensor_fails(self):
+        module = make_module(base_params(unset_thresholds=['upper_warning']))
+        with patch('inlet_config.get_agent') as mga, \
+             patch('inlet_config.pdumodel') as mpm:
+            self._setup_mocks(mga, mpm)
+            inlet_config.run_module(module)
+
+        module.fail_json.assert_called_once()
+        assert 'sensor' in module.fail_json.call_args[1]['msg']

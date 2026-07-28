@@ -70,6 +70,18 @@ options:
   lower_critical:
     description: Lower critical threshold value. Setting it also enables it.
     type: float
+  unset_thresholds:
+    description: >-
+      Threshold fields to disable (clears the corresponding *Active flag without
+      changing the stored value). Requires C(sensor) when set. A field must not
+      appear here and as a value option at the same time.
+    type: list
+    elements: str
+    choices:
+      - upper_critical
+      - upper_warning
+      - lower_warning
+      - lower_critical
 """
 
 EXAMPLES = r"""
@@ -92,6 +104,17 @@ EXAMPLES = r"""
     sensor: voltage
     upper_warning: 240.0
     upper_critical: 250.0
+
+- name: Disable voltage upper_warning threshold on inlet 1
+  taklabo.raritan_xerus.inlet_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    inlet: 1
+    sensor: voltage
+    unset_thresholds:
+      - upper_warning
 """
 
 RETURN = r"""# """
@@ -147,7 +170,14 @@ def run_module(module):
     p = module.params
     inlet_num = p['inlet']
 
-    threshold_params_given = any(p.get(f) is not None for f in THRESHOLD_FIELDS)
+    unset_thresholds = p.get('unset_thresholds') or []
+
+    overlap = [f for f in unset_thresholds if p.get(f) is not None]
+    if overlap:
+        module.fail_json(msg='{} cannot be set and unset at the same time'.format(', '.join(overlap)))
+        return
+
+    threshold_params_given = any(p.get(f) is not None for f in THRESHOLD_FIELDS) or bool(unset_thresholds)
     if threshold_params_given and p.get('sensor') is None:
         module.fail_json(msg='sensor is required when a threshold option is set')
         return
@@ -220,6 +250,9 @@ def run_module(module):
                 setattr(thresholds, value_attr, value)
                 setattr(thresholds, active_attr, True)
                 thresholds_changed = True
+            elif param_name in unset_thresholds and getattr(thresholds, active_attr):
+                setattr(thresholds, active_attr, False)
+                thresholds_changed = True
 
         if thresholds_changed and not module.check_mode:
             try:
@@ -248,6 +281,7 @@ def main():
             upper_warning=dict(type='float'),
             lower_warning=dict(type='float'),
             lower_critical=dict(type='float'),
+            unset_thresholds=dict(type='list', elements='str', choices=list(THRESHOLD_FIELDS.keys())),
         ),
         supports_check_mode=True,
     )
