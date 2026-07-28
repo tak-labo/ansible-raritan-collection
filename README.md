@@ -5,7 +5,7 @@ Ansible Collection for managing Raritan PDU and other devices.
 ## Requirements
 
 - Python >= 3.9
-- `raritan` pip package >= 4.3.0 (tested with 4.3.13)
+- `raritan` pip package == 4.3.13.52458 (pinned to match tested firmware; see below)
 - Raritan PDU firmware (tested with 4.3.13.5-52458 on PX3-5138JR)
 
 ## Installation
@@ -14,7 +14,14 @@ Ansible Collection for managing Raritan PDU and other devices.
 
 Install Python dependency:
 
-    pip install raritan>=4.3.0
+    pip install raritan==4.3.13.52458
+
+The `raritan` SDK's schema must match your PDU's firmware — a newer SDK
+version can declare fields your firmware doesn't return, which crashes
+`pdu_facts`/`dns_config` with a `KeyError`. `4.3.13.52458` matches the
+firmware build this collection is tested against; if your PDU runs a
+different firmware version, pick the matching `raritan` release instead
+of defaulting to the latest.
 
 ## Modules
 
