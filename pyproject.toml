@@ -5,5 +5,5 @@ testpaths = ["tests"]
 dev = [
     "ansible>=14.0.0",
     "pytest>=8.0.0",
-    "raritan>=4.3.0",
+    "raritan==4.3.13.52458",
 ]
