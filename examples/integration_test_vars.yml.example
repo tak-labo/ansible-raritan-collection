@@ -10,6 +10,13 @@ validate_certs: false
 test_outlet: 1
 test_outlet_name: "Integration Test Outlet"
 
+# Test target inlet (1-based index)
+test_inlet: 1
+test_inlet_name: "Integration Test Inlet"
+test_inlet_sensor: "voltage"
+test_inlet_upper_warning: 240.0
+test_inlet_upper_critical: 250.0
+
 # PDU settings used during test (will be restored after)
 pdu_name_test: "Integration Test PDU"
 pdu_cycle_delay_test: 5
