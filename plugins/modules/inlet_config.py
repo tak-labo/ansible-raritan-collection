@@ -32,6 +32,44 @@ options:
   name:
     description: Inlet label name.
     type: str
+  sensor:
+    description: Sensor to configure thresholds for. Required when any threshold option is set.
+    type: str
+    choices:
+      - voltage
+      - current
+      - peak_current
+      - residual_current
+      - residual_ac_current
+      - residual_dc_current
+      - active_power
+      - reactive_power
+      - apparent_power
+      - power_factor
+      - displacement_power_factor
+      - active_energy
+      - apparent_energy
+      - unbalanced_current
+      - unbalanced_line_line_current
+      - unbalanced_voltage
+      - unbalanced_line_line_voltage
+      - line_frequency
+      - phase_angle
+      - crest_factor
+      - voltage_thd
+      - current_thd
+  upper_critical:
+    description: Upper critical threshold value. Setting it also enables it.
+    type: float
+  upper_warning:
+    description: Upper warning threshold value. Setting it also enables it.
+    type: float
+  lower_warning:
+    description: Lower warning threshold value. Setting it also enables it.
+    type: float
+  lower_critical:
+    description: Lower critical threshold value. Setting it also enables it.
+    type: float
 """
 
 EXAMPLES = r"""
@@ -43,6 +81,17 @@ EXAMPLES = r"""
     validate_certs: false
     inlet: 1
     name: "Main Feed"
+
+- name: Set voltage upper thresholds on inlet 1
+  taklabo.raritan_xerus.inlet_config:
+    host: 192.168.1.100
+    username: admin
+    password: secret
+    validate_certs: false
+    inlet: 1
+    sensor: voltage
+    upper_warning: 240.0
+    upper_critical: 250.0
 """
 
 RETURN = r"""# """
@@ -61,10 +110,47 @@ from raritan.rpc import pdumodel
 
 PDU_TARGET = '/model/pdu/0'
 
+SENSOR_MAP = {
+    'voltage': 'voltage',
+    'current': 'current',
+    'peak_current': 'peakCurrent',
+    'residual_current': 'residualCurrent',
+    'residual_ac_current': 'residualACCurrent',
+    'residual_dc_current': 'residualDCCurrent',
+    'active_power': 'activePower',
+    'reactive_power': 'reactivePower',
+    'apparent_power': 'apparentPower',
+    'power_factor': 'powerFactor',
+    'displacement_power_factor': 'displacementPowerFactor',
+    'active_energy': 'activeEnergy',
+    'apparent_energy': 'apparentEnergy',
+    'unbalanced_current': 'unbalancedCurrent',
+    'unbalanced_line_line_current': 'unbalancedLineLineCurrent',
+    'unbalanced_voltage': 'unbalancedVoltage',
+    'unbalanced_line_line_voltage': 'unbalancedLineLineVoltage',
+    'line_frequency': 'lineFrequency',
+    'phase_angle': 'phaseAngle',
+    'crest_factor': 'crestFactor',
+    'voltage_thd': 'voltageThd',
+    'current_thd': 'currentThd',
+}
+
+THRESHOLD_FIELDS = {
+    'upper_critical': ('upperCritical', 'upperCriticalActive'),
+    'upper_warning': ('upperWarning', 'upperWarningActive'),
+    'lower_warning': ('lowerWarning', 'lowerWarningActive'),
+    'lower_critical': ('lowerCritical', 'lowerCriticalActive'),
+}
+
 
 def run_module(module):
     p = module.params
     inlet_num = p['inlet']
+
+    threshold_params_given = any(p.get(f) is not None for f in THRESHOLD_FIELDS)
+    if threshold_params_given and p.get('sensor') is None:
+        module.fail_json(msg='sensor is required when a threshold option is set')
+        return
 
     try:
         agent = get_agent(
@@ -112,7 +198,40 @@ def run_module(module):
             module.fail_json(msg='Failed to set inlet settings: {}'.format(e))
             return
 
-    module.exit_json(changed=settings_changed)
+    thresholds_changed = False
+
+    if p.get('sensor') is not None:
+        try:
+            sensors = inlet.getSensors()
+            sensor = getattr(sensors, SENSOR_MAP[p['sensor']])
+        except Exception as e:
+            module.fail_json(msg='Failed to get sensor {}: {}'.format(p['sensor'], e))
+            return
+
+        try:
+            thresholds = sensor.getThresholds()
+        except Exception as e:
+            module.fail_json(msg='Failed to get thresholds: {}'.format(e))
+            return
+
+        for param_name, (value_attr, active_attr) in THRESHOLD_FIELDS.items():
+            value = p.get(param_name)
+            if value is not None and getattr(thresholds, value_attr) != value:
+                setattr(thresholds, value_attr, value)
+                setattr(thresholds, active_attr, True)
+                thresholds_changed = True
+
+        if thresholds_changed and not module.check_mode:
+            try:
+                rc = sensor.setThresholds(thresholds)
+            except Exception as e:
+                module.fail_json(msg='Failed to set thresholds: {}'.format(e))
+                return
+            if rc != 0:
+                module.fail_json(msg='Failed to set thresholds: rc={}'.format(rc))
+                return
+
+    module.exit_json(changed=settings_changed or thresholds_changed)
 
 
 def main():
@@ -124,6 +243,11 @@ def main():
             validate_certs=dict(type='bool', default=True),
             inlet=dict(type='int', required=True),
             name=dict(type='str'),
+            sensor=dict(type='str', choices=list(SENSOR_MAP.keys())),
+            upper_critical=dict(type='float'),
+            upper_warning=dict(type='float'),
+            lower_warning=dict(type='float'),
+            lower_critical=dict(type='float'),
         ),
         supports_check_mode=True,
     )

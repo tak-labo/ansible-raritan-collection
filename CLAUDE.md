@@ -37,6 +37,7 @@ Two distinct patterns based on resource type:
 - `pdu_config`, `outlet_config`, `inlet_config`, `snmp_config`, `syslog_action`, `snmp_trap_action`, `event_rule`, `dns_config`
 - Pattern: `getSettings()` → diff current vs desired → `setSettings()` if changed
 - Return `changed=True/False` only; no created/deleted semantics
+- `inlet_config` additionally manages sensor alert thresholds via a parallel `getThresholds()`/`setThresholds()` pattern on the `Inlet.Sensors.<sensor>` (`sensors.NumericSensor`) object selected by the `sensor` param (see `SENSOR_MAP`). Setting a threshold value (`upper_critical`/`upper_warning`/`lower_warning`/`lower_critical`) also flips its `*Active` enable flag to `True`; there is no way to disable a threshold through this module. `setThresholds()` returns an int rc (0=OK) rather than raising, so the rc must be checked explicitly.
 
 **Resource modules** (state: present/absent):
 - `user_account`

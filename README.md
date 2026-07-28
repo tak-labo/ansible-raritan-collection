@@ -23,7 +23,7 @@ Install Python dependency:
 | `taklabo.raritan_xerus.datetime_config` | Configure NTP servers and timezone |
 | `taklabo.raritan_xerus.dns_config` | Configure DNS server addresses, search suffixes, and IPv6 resolver preference |
 | `taklabo.raritan_xerus.event_rule` | Manage event engine rules (bind actions to event conditions) |
-| `taklabo.raritan_xerus.inlet_config` | Configure individual inlet name |
+| `taklabo.raritan_xerus.inlet_config` | Configure individual inlet name and sensor thresholds |
 | `taklabo.raritan_xerus.outlet_config` | Configure individual outlets and control power state (on/off/cycle) |
 | `taklabo.raritan_xerus.pdu_config` | Configure PDU-wide settings (name, startup state, cycle delay) |
 | `taklabo.raritan_xerus.pdu_facts` | Collect PDU facts (model, firmware, inlet sensors, outlet states) |
@@ -89,6 +89,11 @@ Server and suffix lists are compared order-insensitively.
 | `validate_certs` | bool | no (default: true) | Validate TLS certificate |
 | `inlet` | int | yes | Inlet number (1-based) |
 | `name` | str | no | Inlet label |
+| `sensor` | str | no | Sensor to configure thresholds for (`voltage`, `current`, `active_power`, etc.). Required when any threshold option is set |
+| `upper_critical` | float | no | Upper critical threshold value. Setting it also enables it |
+| `upper_warning` | float | no | Upper warning threshold value. Setting it also enables it |
+| `lower_warning` | float | no | Lower warning threshold value. Setting it also enables it |
+| `lower_critical` | float | no | Lower critical threshold value. Setting it also enables it |
 
 ### outlet_config
 
