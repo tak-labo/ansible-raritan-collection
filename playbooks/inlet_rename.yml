@@ -1,0 +1,32 @@
+---
+# Rename a specific inlet.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/inlet_rename.yml
+#
+# You will be prompted for the inlet number and new name.
+
+- name: Rename inlet
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  vars_prompt:
+    - name: inlet_number
+      prompt: "Inlet number to rename"
+      private: false
+    - name: inlet_name
+      prompt: "New inlet name"
+      private: false
+
+  tasks:
+    - name: Rename inlet {{ inlet_number }}
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ inlet_number | int }}"
+        name: "{{ inlet_name }}"

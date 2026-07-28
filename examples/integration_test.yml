@@ -169,6 +169,64 @@
         fail_msg: "Expected changed=true for power cycle, got: {{ outlet_cycle }}"
 
     # -------------------------------------------------------------------------
+    # inlet_config tests
+    # -------------------------------------------------------------------------
+
+    - name: "[inlet_config] set inlet name"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        name: "{{ test_inlet_name }}"
+      register: inlet_name_set
+
+    - name: "[inlet_config] re-apply same inlet name (idempotency)"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        name: "{{ test_inlet_name }}"
+      register: inlet_name_idempotent
+
+    - name: "[inlet_config] assert inlet name idempotent"
+      assert:
+        that: inlet_name_idempotent is not changed
+        fail_msg: "Expected changed=false on re-apply, got: {{ inlet_name_idempotent }}"
+
+    - name: "[inlet_config] set sensor thresholds"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        sensor: "{{ test_inlet_sensor }}"
+        upper_warning: "{{ test_inlet_upper_warning }}"
+        upper_critical: "{{ test_inlet_upper_critical }}"
+      register: inlet_thresholds_set
+
+    - name: "[inlet_config] re-apply same sensor thresholds (idempotency)"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        sensor: "{{ test_inlet_sensor }}"
+        upper_warning: "{{ test_inlet_upper_warning }}"
+        upper_critical: "{{ test_inlet_upper_critical }}"
+      register: inlet_thresholds_idempotent
+
+    - name: "[inlet_config] assert sensor thresholds idempotent"
+      assert:
+        that: inlet_thresholds_idempotent is not changed
+        fail_msg: "Expected changed=false on re-apply, got: {{ inlet_thresholds_idempotent }}"
+
+    # -------------------------------------------------------------------------
     # snmp_config tests
     # -------------------------------------------------------------------------
 
