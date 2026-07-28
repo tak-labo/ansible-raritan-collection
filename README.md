@@ -25,6 +25,7 @@ Install Python dependency:
 | `taklabo.raritan_xerus.event_rule` | Manage event engine rules (bind actions to event conditions) |
 | `taklabo.raritan_xerus.inlet_config` | Configure individual inlet name and sensor thresholds |
 | `taklabo.raritan_xerus.outlet_config` | Configure individual outlets and control power state (on/off/cycle) |
+| `taklabo.raritan_xerus.pdu_backup` | Download and save a PDU configuration backup locally |
 | `taklabo.raritan_xerus.pdu_config` | Configure PDU-wide settings (name, startup state, cycle delay) |
 | `taklabo.raritan_xerus.pdu_facts` | Collect PDU facts (model, firmware, inlet sensors, outlet states) |
 | `taklabo.raritan_xerus.snmp_config` | Configure SNMP v2/v3 settings |
@@ -32,7 +33,7 @@ Install Python dependency:
 | `taklabo.raritan_xerus.syslog_action` | Manage syslog event actions in the PDU event engine |
 | `taklabo.raritan_xerus.user_account` | Manage PDU user accounts with SNMPv3 settings (create/update/delete) |
 
-All modules are idempotent and support `check_mode`. `pdu_facts` is read-only and always returns `changed=false`.
+All modules support `check_mode`. Most are idempotent; `pdu_facts` is read-only and always returns `changed=false`, and `pdu_backup` is only idempotent when `filename` is set explicitly (see below).
 
 ## Module Reference
 
@@ -118,6 +119,22 @@ Server and suffix lists are compared order-insensitively.
 | `unset_thresholds` | list[str] | no | Threshold fields to disable (`upper_critical`/`upper_warning`/`lower_warning`/`lower_critical`). Requires `sensor`. A field can't be set and unset at the same time |
 
 `state: cycle` always reports `changed: true`. Outlet sensors don't include the residual-current/three-phase-imbalance sensors available on inlets (see `SENSOR_MAP` in `plugins/modules/outlet_config.py` for the full list).
+
+### pdu_backup
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `host` | str | yes | PDU hostname or IP address |
+| `username` | str | yes | Authentication username |
+| `password` | str | yes | Authentication password |
+| `validate_certs` | bool | no (default: true) | Validate TLS certificate |
+| `backup_path` | str | no (default: `./backup`) | Local directory to save the backup file into. Created if missing |
+| `filename` | str | no | Backup filename. If omitted, a timestamped filename is generated and every run is treated as a new backup |
+| `method` | str | no (default: raw) | `raw` downloads the device's raw config; `bulk` uses the bulk config mechanism in backup mode (supports encryption/filter profiles) |
+| `bulk_password` | str | no | Password to encrypt the bulk config file with. Only used when `method=bulk` |
+| `bulk_filter_profile` | str | no | Bulk configuration filter profile name. Only used when `method=bulk` |
+
+Unlike other modules, this performs a raw HTTP file download (not JSON-RPC) via the SDK's `rawcfg`/`bulkcfg` module-level functions — there is no `getSettings`/`setSettings` diff step. When `filename` is omitted, a new timestamped file is written on every run and `changed` is always `true` (matching the "backup" behavior of network modules like `ios_config`). When `filename` is set explicitly, the downloaded content is compared byte-for-byte against the existing file and `changed` is `false` when unchanged — useful for fixed-path backups run on a schedule. Restoring a backup (upload) is not implemented yet.
 
 ### pdu_config
 

@@ -42,7 +42,7 @@ cp plugins/modules/<module>.py /tmp/ansible_collections/raritan/xerus/plugins/mo
 
 ### Module Patterns
 
-Two distinct patterns based on resource type:
+Three distinct patterns based on resource type:
 
 **Settings modules** (idempotent diff + apply):
 - `pdu_config`, `outlet_config`, `inlet_config`, `snmp_config`, `syslog_action`, `snmp_trap_action`, `event_rule`, `dns_config`
@@ -56,6 +56,12 @@ Two distinct patterns based on resource type:
 - Pattern: `getAccountNames()` → create/update/delete based on `state` param
 - `createAccountFull` cannot set `AUTH_PRIV`/`AUTH_NO_PRIV` at creation time (API limitation, returns rc=5). Workaround: two-step — create with `uuid`-based temp password + blank `UserInfo()`, then immediately `updateAccountFull` with the real password and SNMPv3 settings.
 - `updateAccountFull` returns rc=1 if the new password equals the current one; the two-step approach naturally avoids this.
+
+**Raw I/O modules** (non-JSON-RPC HTTP transfer):
+- `pdu_backup`
+- Pattern: `rawcfg.download()` / `bulkcfg.download(backup=True, ...)` — module-level functions (not `Interface` classes), returning raw bytes via `agent.get()`/`agent.form_data_file()` (raw HTTP to `/cgi-bin/*.cgi`, not JSON-RPC). The module writes the bytes to a local file under `backup_path`. No `getSettings`/`setSettings` diff step exists.
+- `changed` semantics are a deliberate exception to the usual idempotent pattern: an auto-generated timestamped filename (the default) always reports `changed=True` since each run creates a new backup file, matching the "backup" behavior of network modules like `ios_config`. Only when `filename` is set explicitly does the module compare downloaded bytes against the existing file and report `changed=False` when unchanged.
+- Upload/restore (`rawcfg.upload()`/`bulkcfg.upload()`) is not implemented — `pdu_backup` is backup-only by design; a `pdu_restore` module would be a separate addition.
 
 ### SDK Access Pattern
 
@@ -83,6 +89,7 @@ rc = mgr.setSettings(settings)
 | `dns_config` | `net.Net` | `/net` (NOT `/net/manager`) |
 | `datetime_config` | `datetime.DateTime` | `/datetime` |
 | `user_account` | `usermgmt.UserManager` / `usermgmt.User` | `/auth/user` / `/auth/user/<name>` |
+| `pdu_backup` | `rawcfg.download()` / `bulkcfg.download()` (module-level functions) | N/A — raw HTTP `/cgi-bin/*.cgi`, not JSON-RPC |
 
 ### Unit Test Pattern
 
@@ -98,6 +105,8 @@ with patch('dns_config.get_agent') as mga, patch('dns_config.net') as mnet:
 ```
 
 The module file imports `from raritan.rpc import net` at module level, so patch the whole `net` module as `<module_name>.net`.
+
+`pdu_backup` is the exception: `rawcfg`/`bulkcfg` are function modules, not `Interface` classes, so tests `patch('pdu_backup.rawcfg')`/`patch('pdu_backup.bulkcfg')` and set `.download.return_value` directly (no `.return_value.getSettings` chain). File I/O is verified against a real filesystem via pytest's `tmp_path` fixture rather than mocking `open()`.
 
 ### Integration Test Conventions
 
