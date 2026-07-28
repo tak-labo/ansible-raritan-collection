@@ -1,0 +1,33 @@
+---
+# Back up the PDU configuration to a local file.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/pdu_backup.yml
+#
+# By default this writes a new timestamped file into ./backup on every run
+# (changed=true every time). Set `pdu_backup_filename` in vars.yml to a fixed
+# name instead for idempotent, scheduled backups (changed=false when the
+# config hasn't drifted since the last run).
+
+- name: Back up PDU configuration
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Download and save PDU configuration
+      taklabo.raritan_xerus.pdu_backup:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        backup_path: "{{ pdu_backup_path | default('./backup') }}"
+        filename: "{{ pdu_backup_filename | default(omit) }}"
+      register: backup_result
+
+    - name: Show backup result
+      ansible.builtin.debug:
+        msg: "Saved {{ backup_result.size }} bytes to {{ backup_result.backup_file }}"

@@ -1,0 +1,43 @@
+---
+# Set upper warning/critical thresholds on a specific inlet sensor.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/inlet_threshold.yml
+#
+# You will be prompted for the inlet number, sensor, and threshold values.
+# See plugins/modules/inlet_config.py's `sensor` choices for the full sensor
+# list (voltage, current, active_power, etc.).
+
+- name: Set inlet sensor thresholds
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  vars_prompt:
+    - name: inlet_number
+      prompt: "Inlet number"
+      private: false
+    - name: sensor_name
+      prompt: "Sensor (e.g. voltage, current, active_power)"
+      private: false
+      default: voltage
+    - name: threshold_upper_warning
+      prompt: "Upper warning threshold value"
+      private: false
+    - name: threshold_upper_critical
+      prompt: "Upper critical threshold value"
+      private: false
+
+  tasks:
+    - name: Set thresholds on inlet {{ inlet_number }} sensor {{ sensor_name }}
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ inlet_number | int }}"
+        sensor: "{{ sensor_name }}"
+        upper_warning: "{{ threshold_upper_warning | float }}"
+        upper_critical: "{{ threshold_upper_critical | float }}"
