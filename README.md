@@ -140,7 +140,7 @@ Returns `ansible_facts.pdu` with the following keys:
 | `model`, `serial_number`, `part_number` | Hardware identification |
 | `firmware`, `hardware`, `mac_address` | Firmware version, hardware revision, MAC address |
 | `name`, `cycle_delay`, `startup_state` | Current PDU settings |
-| `inlets[]` | List of inlet sensor readings (`voltage_v`, `current_a`, `active_power_w`, `apparent_power_va`, `power_factor`, `line_frequency_hz`, `active_energy_wh`) |
+| `inlets[]` | List of inlet sensor readings (`voltage_v`, `current_a`, `active_power_w`, `apparent_power_va`, `power_factor`, `line_frequency_hz`, `active_energy_wh`) plus thresholds (`voltage_thresholds`, `current_thresholds`, `active_power_thresholds`, `apparent_power_thresholds`, each a dict with `upper_critical`/`upper_warning`/`lower_warning`/`lower_critical`, `null` when not active) |
 | `outlets[]` | List of outlet states (`number`, `name`, `power_state`, `available`, `current_a`, `active_power_w`) |
 
 ### snmp_config
