@@ -1,5 +1,9 @@
 # Raritan SDK: Outlet Sensors Reference
 
+> For the broader sensor landscape (PDU body, circuits, OCP/breakers, outlet
+> groups, power meters, transfer switches, external peripherals) and overall
+> module coverage, see `docs/raritan-sdk-sensor-coverage.md`.
+
 Reference notes on `raritan.rpc.pdumodel.Outlet.Sensors` and the underlying
 `raritan.rpc.sensors.NumericSensor` API, gathered while implementing
 `outlet_config`'s threshold support. Companion to
