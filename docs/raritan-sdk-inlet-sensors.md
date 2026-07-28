@@ -1,5 +1,9 @@
 # Raritan SDK: Inlet Sensors Reference
 
+> For the broader sensor landscape (PDU body, circuits, OCP/breakers, outlet
+> groups, power meters, transfer switches, external peripherals) and overall
+> module coverage, see `docs/raritan-sdk-sensor-coverage.md`.
+
 Reference notes on `raritan.rpc.pdumodel.Inlet.Sensors` and the underlying
 `raritan.rpc.sensors.NumericSensor` API, gathered while implementing
 `inlet_config`'s threshold support and `pdu_facts`'s threshold reporting.
