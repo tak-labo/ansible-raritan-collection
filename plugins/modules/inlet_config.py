@@ -246,7 +246,8 @@ def run_module(module):
 
         for param_name, (value_attr, active_attr) in THRESHOLD_FIELDS.items():
             value = p.get(param_name)
-            if value is not None and getattr(thresholds, value_attr) != value:
+            if value is not None and (getattr(thresholds, value_attr) != value
+                                       or not getattr(thresholds, active_attr)):
                 setattr(thresholds, value_attr, value)
                 setattr(thresholds, active_attr, True)
                 thresholds_changed = True
