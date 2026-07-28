@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Workflow
+
+Never commit or push directly to `main`. Branch protection on `main` has `enforce_admins` enabled, so direct pushes (including by repo admins) are rejected server-side. Always work on a feature branch and open a PR:
+
+```bash
+git checkout -b <feature-branch>
+# commit changes
+git push -u origin <feature-branch>
+gh pr create
+```
+
 ## Commands
 
 ```bash
