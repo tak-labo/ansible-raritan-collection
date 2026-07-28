@@ -226,6 +226,62 @@
         that: inlet_thresholds_idempotent is not changed
         fail_msg: "Expected changed=false on re-apply, got: {{ inlet_thresholds_idempotent }}"
 
+    - name: "[inlet_config] unset upper_warning threshold"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        sensor: "{{ test_inlet_sensor }}"
+        unset_thresholds:
+          - upper_warning
+      register: inlet_threshold_unset
+
+    - name: "[inlet_config] assert unset reports changed"
+      assert:
+        that: inlet_threshold_unset is changed
+        fail_msg: "Expected changed=true unsetting upper_warning, got: {{ inlet_threshold_unset }}"
+
+    - name: "[inlet_config] re-unset upper_warning threshold (idempotency)"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        sensor: "{{ test_inlet_sensor }}"
+        unset_thresholds:
+          - upper_warning
+      register: inlet_threshold_unset_idempotent
+
+    - name: "[inlet_config] assert unset idempotent"
+      assert:
+        that: inlet_threshold_unset_idempotent is not changed
+        fail_msg: "Expected changed=false on re-unset, got: {{ inlet_threshold_unset_idempotent }}"
+
+    - name: "[inlet_config] confirm upper_warning cleared via pdu_facts"
+      taklabo.raritan_xerus.pdu_facts:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+
+    - name: "[inlet_config] assert upper_warning is null in facts"
+      assert:
+        that: ansible_facts.pdu.inlets[test_inlet - 1].voltage_thresholds.upper_warning is none
+        fail_msg: "Expected voltage_thresholds.upper_warning to be null, got: {{ ansible_facts.pdu.inlets[test_inlet - 1].voltage_thresholds }}"
+
+    - name: "[inlet_config] restore upper_warning threshold"
+      taklabo.raritan_xerus.inlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        inlet: "{{ test_inlet }}"
+        sensor: "{{ test_inlet_sensor }}"
+        upper_warning: "{{ test_inlet_upper_warning }}"
+
     # -------------------------------------------------------------------------
     # snmp_config tests
     # -------------------------------------------------------------------------
