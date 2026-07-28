@@ -38,6 +38,20 @@ def make_inlet_sensors(voltage=100.0, current=1.0, power=100.0, apparent=110.0,
     return s
 
 
+def make_thresholds(upper_critical=None, upper_warning=None,
+                     lower_warning=None, lower_critical=None):
+    t = MagicMock()
+    t.upperCriticalActive = upper_critical is not None
+    t.upperCritical = upper_critical or 0.0
+    t.upperWarningActive = upper_warning is not None
+    t.upperWarning = upper_warning or 0.0
+    t.lowerWarningActive = lower_warning is not None
+    t.lowerWarning = lower_warning or 0.0
+    t.lowerCriticalActive = lower_critical is not None
+    t.lowerCritical = lower_critical or 0.0
+    return t
+
+
 def make_outlet_sensors(current=0.5, power=50.0):
     s = MagicMock()
     s.current.getReading.return_value = make_reading(current)
@@ -170,6 +184,40 @@ class TestPduFacts:
             pdu_facts.run_module(module)
         facts = module.exit_json.call_args[1]['ansible_facts']['pdu']
         assert facts['inlets'][0]['voltage_v'] is None
+
+    def test_inlet_thresholds_returned(self):
+        module = make_module()
+        inlet = MagicMock()
+        s = make_inlet_sensors()
+        s.voltage.getThresholds.return_value = make_thresholds(
+            upper_critical=250.0, upper_warning=240.0)
+        s.current.getThresholds.return_value = make_thresholds(lower_critical=0.5)
+        inlet.getSensors.return_value = s
+        with patch('pdu_facts.get_agent') as mga, patch('pdu_facts.pdumodel') as mpm:
+            self._setup(mga, mpm, inlets=[inlet])
+            pdu_facts.run_module(module)
+        inlet_facts = module.exit_json.call_args[1]['ansible_facts']['pdu']['inlets'][0]
+        assert inlet_facts['voltage_thresholds'] == {
+            'upper_critical': 250.0, 'upper_warning': 240.0,
+            'lower_warning': None, 'lower_critical': None,
+        }
+        assert inlet_facts['current_thresholds']['lower_critical'] == 0.5
+        assert inlet_facts['current_thresholds']['upper_critical'] is None
+
+    def test_inlet_thresholds_exception_returns_all_none(self):
+        module = make_module()
+        inlet = MagicMock()
+        s = make_inlet_sensors()
+        s.voltage.getThresholds.side_effect = Exception('rpc error')
+        inlet.getSensors.return_value = s
+        with patch('pdu_facts.get_agent') as mga, patch('pdu_facts.pdumodel') as mpm:
+            self._setup(mga, mpm, inlets=[inlet])
+            pdu_facts.run_module(module)
+        inlet_facts = module.exit_json.call_args[1]['ansible_facts']['pdu']['inlets'][0]
+        assert inlet_facts['voltage_thresholds'] == {
+            'upper_critical': None, 'upper_warning': None,
+            'lower_warning': None, 'lower_critical': None,
+        }
 
     def test_outlet_facts(self):
         module = make_module()

@@ -171,6 +171,20 @@ def _read(sensor):
         return None
 
 
+def _read_thresholds(sensor):
+    try:
+        t = sensor.getThresholds()
+        return {
+            'upper_critical': round(t.upperCritical, 4) if t.upperCriticalActive else None,
+            'upper_warning': round(t.upperWarning, 4) if t.upperWarningActive else None,
+            'lower_warning': round(t.lowerWarning, 4) if t.lowerWarningActive else None,
+            'lower_critical': round(t.lowerCritical, 4) if t.lowerCriticalActive else None,
+        }
+    except Exception:
+        return {'upper_critical': None, 'upper_warning': None,
+                'lower_warning': None, 'lower_critical': None}
+
+
 def _collect_inlet(inlet, idx):
     try:
         s = inlet.getSensors()
@@ -185,6 +199,10 @@ def _collect_inlet(inlet, idx):
         'power_factor': _read(s.powerFactor),
         'line_frequency_hz': _read(s.lineFrequency),
         'active_energy_wh': _read(s.activeEnergy),
+        'voltage_thresholds': _read_thresholds(s.voltage),
+        'current_thresholds': _read_thresholds(s.current),
+        'active_power_thresholds': _read_thresholds(s.activePower),
+        'apparent_power_thresholds': _read_thresholds(s.apparentPower),
     }
 
 
