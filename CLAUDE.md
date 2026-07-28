@@ -34,7 +34,7 @@ cp plugins/modules/<module>.py /tmp/ansible_collections/raritan/xerus/plugins/mo
 Two distinct patterns based on resource type:
 
 **Settings modules** (idempotent diff + apply):
-- `pdu_config`, `outlet_config`, `snmp_config`, `syslog_action`, `snmp_trap_action`, `event_rule`, `dns_config`
+- `pdu_config`, `outlet_config`, `inlet_config`, `snmp_config`, `syslog_action`, `snmp_trap_action`, `event_rule`, `dns_config`
 - Pattern: `getSettings()` → diff current vs desired → `setSettings()` if changed
 - Return `changed=True/False` only; no created/deleted semantics
 
@@ -64,6 +64,7 @@ rc = mgr.setSettings(settings)
 | `pdu_config` | `pdu.Pdu` | `/pdu/0` |
 | `pdu_facts` | `pdumodel.Pdu` | `/model/pdu/0` |
 | `outlet_config` | `outlet.Outlet` | `/outlet/<n>` |
+| `inlet_config` | `pdumodel.Pdu` | `/model/pdu/0` (via `getInlets()`) |
 | `snmp_config` | `snmp.Snmp` | `/snmp` |
 | `syslog_action` / `snmp_trap_action` / `event_rule` | `eventengine.*` | `/eventengine` |
 | `dns_config` | `net.Net` | `/net` (NOT `/net/manager`) |

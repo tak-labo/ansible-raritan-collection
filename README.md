@@ -23,6 +23,7 @@ Install Python dependency:
 | `taklabo.raritan_xerus.datetime_config` | Configure NTP servers and timezone |
 | `taklabo.raritan_xerus.dns_config` | Configure DNS server addresses, search suffixes, and IPv6 resolver preference |
 | `taklabo.raritan_xerus.event_rule` | Manage event engine rules (bind actions to event conditions) |
+| `taklabo.raritan_xerus.inlet_config` | Configure individual inlet name |
 | `taklabo.raritan_xerus.outlet_config` | Configure individual outlets and control power state (on/off/cycle) |
 | `taklabo.raritan_xerus.pdu_config` | Configure PDU-wide settings (name, startup state, cycle delay) |
 | `taklabo.raritan_xerus.pdu_facts` | Collect PDU facts (model, firmware, inlet sensors, outlet states) |
@@ -77,6 +78,17 @@ Server and suffix lists are compared order-insensitively.
 | `enabled` | bool | no (default: true) | Whether the rule is active |
 | `auto_rearm` | bool | no (default: true) | Automatically rearm after firing |
 | `state` | str | no (default: present) | `present` to create/update, `absent` to delete |
+
+### inlet_config
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `host` | str | yes | PDU hostname or IP address |
+| `username` | str | yes | Authentication username |
+| `password` | str | yes | Authentication password |
+| `validate_certs` | bool | no (default: true) | Validate TLS certificate |
+| `inlet` | int | yes | Inlet number (1-based) |
+| `name` | str | no | Inlet label |
 
 ### outlet_config
 
