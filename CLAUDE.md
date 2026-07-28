@@ -70,7 +70,24 @@ settings = mgr.getSettings()
 rc = mgr.setSettings(settings)
 ```
 
-### Key RPC Targets
+#### Firmware/SDK schema mismatch (KeyError on real hardware)
+
+The `raritan` SDK's struct `decode()` methods default to `useDefaults=False` (strict: raises `KeyError` if an expected field is absent from the response), and the public wrapper methods (`pdu.getMetaData()`, `net.Net.getSettings()`, etc.) always call `decode()` without overriding that flag — there's no kwarg to opt into leniency through the normal API. Real PDUs running firmware older/newer than the SDK's schema can omit fields the SDK expects (e.g. `supportedInletWirings`, `stablePrivacyEnabled`), which crashes the wrapper call with `KeyError: '<field>'` (see issue #11, #12).
+
+Fix pattern (applied in `pdu_facts.py`'s `_get_meta`/`_get_settings`/`_decode_with_defaults`): catch the `KeyError` from the normal wrapper call and retry via the lower-level call, decoding with `useDefaults=True` so missing fields fall back to schema defaults instead of crashing:
+
+```python
+def _decode_with_defaults(agent, target, method_name, decode_cls):
+    rsp = agent.json_rpc(target, method_name, {})
+    return decode_cls.decode(rsp['_ret_'], agent, useDefaults=True)
+
+try:
+    meta = pdu.getMetaData()
+except KeyError:
+    meta = _decode_with_defaults(agent, PDU_TARGET, 'getMetaData', pdumodel.Pdu.MetaData)
+```
+
+Only applied where it's known to be needed (read-only `pdu_facts` so far) — for a settings-module that reads-then-writes-back (e.g. `dns_config`), applying the same fallback means writing back schema-default values for fields the device may not actually support, which needs real-hardware verification before rollout (tracked in issue #12).
 
 | Module | RPC Class | Target Path |
 |--------|-----------|-------------|

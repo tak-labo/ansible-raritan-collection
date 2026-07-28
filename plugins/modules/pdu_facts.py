@@ -229,6 +229,29 @@ def _collect_outlet(outlet, number):
     return result
 
 
+def _decode_with_defaults(agent, target, method_name, decode_cls):
+    rsp = agent.json_rpc(target, method_name, {})
+    return decode_cls.decode(rsp['_ret_'], agent, useDefaults=True)
+
+
+def _get_meta(pdu, agent):
+    try:
+        return pdu.getMetaData()
+    except KeyError:
+        # Firmware/SDK schema mismatch: a field the SDK expects is missing
+        # from the response, and getMetaData() decodes strictly. Retry via
+        # a direct RPC call decoded with useDefaults=True so missing fields
+        # fall back to schema defaults instead of crashing. See issue #11.
+        return _decode_with_defaults(agent, PDU_TARGET, 'getMetaData', pdumodel.Pdu.MetaData)
+
+
+def _get_settings(pdu, agent):
+    try:
+        return pdu.getSettings()
+    except KeyError:
+        return _decode_with_defaults(agent, PDU_TARGET, 'getSettings', pdumodel.Pdu.Settings)
+
+
 def run_module(module):
     p = module.params
 
@@ -246,8 +269,8 @@ def run_module(module):
     pdu = pdumodel.Pdu(PDU_TARGET, agent)
 
     try:
-        meta = pdu.getMetaData()
-        settings = pdu.getSettings()
+        meta = _get_meta(pdu, agent)
+        settings = _get_settings(pdu, agent)
     except Exception as e:
         module.fail_json(msg='Failed to get PDU info: {}'.format(e))
         return

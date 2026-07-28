@@ -263,3 +263,66 @@ class TestPduFacts:
             mock_pdu.getMetaData.side_effect = Exception('RPC error')
             pdu_facts.run_module(module)
         module.fail_json.assert_called_once()
+
+    def test_get_metadata_keyerror_falls_back_to_relaxed_decode(self):
+        # Real hardware with older/newer firmware than the raritan SDK schema
+        # expects can omit a field (e.g. supportedInletWirings), and the SDK's
+        # getMetaData() decodes strictly (useDefaults=False) causing a
+        # KeyError. We retry via a direct RPC call decoded with
+        # useDefaults=True so missing fields fall back to schema defaults
+        # instead of crashing the whole module. See GitHub issue #11.
+        module = make_module()
+        with patch('pdu_facts.get_agent') as mga, patch('pdu_facts.pdumodel') as mpm:
+            mock_agent = MagicMock()
+            mga.return_value = mock_agent
+            mock_pdu = MagicMock()
+            mpm.Pdu.return_value = mock_pdu
+            mock_pdu.getMetaData.side_effect = KeyError('supportedInletWirings')
+            mock_pdu.getSettings.return_value = make_settings()
+            mock_pdu.getInlets.return_value = []
+            mock_pdu.getOutlets.return_value = []
+            mock_agent.json_rpc.return_value = {'_ret_': {'raw': 'json'}}
+            mpm.Pdu.MetaData.decode.return_value = make_meta()
+
+            pdu_facts.run_module(module)
+
+        mock_agent.json_rpc.assert_called_once_with(pdu_facts.PDU_TARGET, 'getMetaData', {})
+        mpm.Pdu.MetaData.decode.assert_called_once_with({'raw': 'json'}, mock_agent, useDefaults=True)
+        module.fail_json.assert_not_called()
+        module.exit_json.assert_called_once()
+
+    def test_get_settings_keyerror_falls_back_to_relaxed_decode(self):
+        module = make_module()
+        with patch('pdu_facts.get_agent') as mga, patch('pdu_facts.pdumodel') as mpm:
+            mock_agent = MagicMock()
+            mga.return_value = mock_agent
+            mock_pdu = MagicMock()
+            mpm.Pdu.return_value = mock_pdu
+            mock_pdu.getMetaData.return_value = make_meta()
+            mock_pdu.getSettings.side_effect = KeyError('someMissingField')
+            mock_pdu.getInlets.return_value = []
+            mock_pdu.getOutlets.return_value = []
+            mock_agent.json_rpc.return_value = {'_ret_': {'raw': 'json'}}
+            mpm.Pdu.Settings.decode.return_value = make_settings()
+
+            pdu_facts.run_module(module)
+
+        mock_agent.json_rpc.assert_called_once_with(pdu_facts.PDU_TARGET, 'getSettings', {})
+        mpm.Pdu.Settings.decode.assert_called_once_with({'raw': 'json'}, mock_agent, useDefaults=True)
+        module.fail_json.assert_not_called()
+        module.exit_json.assert_called_once()
+
+    def test_get_metadata_other_exception_still_fails(self):
+        module = make_module()
+        with patch('pdu_facts.get_agent') as mga, patch('pdu_facts.pdumodel') as mpm:
+            mock_agent = MagicMock()
+            mga.return_value = mock_agent
+            mock_pdu = MagicMock()
+            mpm.Pdu.return_value = mock_pdu
+            mock_pdu.getMetaData.side_effect = Exception('connection reset')
+
+            pdu_facts.run_module(module)
+
+        mock_agent.json_rpc.assert_not_called()
+        module.fail_json.assert_called_once()
+        assert 'connection reset' in module.fail_json.call_args[1]['msg']
