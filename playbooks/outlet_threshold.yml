@@ -1,0 +1,45 @@
+---
+# Set upper warning/critical thresholds on a specific outlet sensor.
+#
+# Usage:
+#   cp playbooks/vars.yml.example playbooks/vars.yml
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   ansible-playbook playbooks/outlet_threshold.yml
+#
+# You will be prompted for the outlet number, sensor, and threshold values.
+# See plugins/modules/outlet_config.py's `sensor` choices for the full sensor
+# list (voltage, current, active_power, etc.). Outlets don't have the
+# three-phase/residual-current sensors inlets do, but add maximum_current
+# and inrush_current.
+
+- name: Set outlet sensor thresholds
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  vars_prompt:
+    - name: outlet_number
+      prompt: "Outlet number"
+      private: false
+    - name: sensor_name
+      prompt: "Sensor (e.g. current, active_power)"
+      private: false
+      default: current
+    - name: threshold_upper_warning
+      prompt: "Upper warning threshold value"
+      private: false
+    - name: threshold_upper_critical
+      prompt: "Upper critical threshold value"
+      private: false
+
+  tasks:
+    - name: Set thresholds on outlet {{ outlet_number }} sensor {{ sensor_name }}
+      taklabo.raritan_xerus.outlet_config:
+        host: "{{ pdu_host }}"
+        username: "{{ pdu_user }}"
+        password: "{{ pdu_pass }}"
+        validate_certs: "{{ validate_certs }}"
+        outlet: "{{ outlet_number | int }}"
+        sensor: "{{ sensor_name }}"
+        upper_warning: "{{ threshold_upper_warning | float }}"
+        upper_critical: "{{ threshold_upper_critical | float }}"
