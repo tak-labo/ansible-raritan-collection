@@ -2,14 +2,23 @@
 # Configure event monitoring: syslog action + SNMP trap action + event rule.
 # All three tasks are idempotent — safe to run multiple times.
 #
-# This playbook wires up:
-#   1. A syslog action that sends events to a syslog server
-#   2. An SNMP trap action that sends traps to an NMS
-#   3. An event rule that fires both actions on every PDU event
+# This playbook wires up a complete event notification pipeline:
+#   1. A syslog action (UDP to syslog server, port 514 by default)
+#   2. An SNMP trap action (v2Trap to NMS, port 162 by default)
+#   3. An event rule that triggers both actions on any PDU event (event_id: ["**"])
+#
+# Variables required in playbooks/vars.yml:
+#   - syslog_action_name (string): name for the syslog action
+#   - syslog_server (string): syslog server hostname or IP
+#   - syslog_port (int, default: 514): UDP port for syslog
+#   - snmp_trap_action_name (string): name for the SNMP trap action
+#   - snmp_trap_dest_host (string): NMS/trap collector hostname or IP
+#   - snmp_read_community (string): SNMP v2c community for traps
+#   - event_rule_name (string): name for the event rule
 #
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host/user/pass and syslog/snmp variables
+#   vi playbooks/vars.yml   # set all variables above
 #   ansible-playbook playbooks/monitoring_setup.yml
 
 - name: Set up PDU event monitoring

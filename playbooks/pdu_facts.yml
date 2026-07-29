@@ -1,10 +1,22 @@
 ---
 # Display PDU hardware information and current sensor readings.
 #
+# Collects and displays:
+# - PDU model, serial number, firmware version, MAC address, name
+# - Inlet readings: voltage (V), current (A), active power (W) for each inlet
+# - Outlet states: power state, current draw, active power for each outlet
+#
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
 #   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
 #   ansible-playbook playbooks/pdu_facts.yml
+#
+# Returns:
+#   - ansible_facts.pdu.model: PDU model name
+#   - ansible_facts.pdu.serial_number: Serial number
+#   - ansible_facts.pdu.firmware: Firmware version
+#   - ansible_facts.pdu.inlets: List of inlet readings (voltage, current, power, thresholds)
+#   - ansible_facts.pdu.outlets: List of outlet states and readings
 
 - name: Show PDU information
   hosts: localhost

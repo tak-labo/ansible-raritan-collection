@@ -1,14 +1,28 @@
 ---
-# Set upper warning/critical thresholds on a specific inlet sensor.
+# Set upper warning/critical alert thresholds on a specific inlet sensor.
+#
+# Prompts for inlet number, sensor type, and two threshold values.
+# Idempotent: if thresholds are already set, reports changed=false.
+#
+# Supported sensors: voltage, current, active_power, apparent_power, frequency,
+# power_factor, three_phase_apparent_power, three_phase_active_power,
+# residual_current, neutral_current, total_power_factor, total_active_power,
+# total_apparent_power, total_current
+# (see inlet_config module reference for units and defaults).
+#
+# Setting a threshold automatically enables that threshold's alert.
+# To disable without losing the stored value, use inlet_config's unset_thresholds.
 #
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/inlet_threshold.yml
 #
-# You will be prompted for the inlet number, sensor, and threshold values.
-# See plugins/modules/inlet_config.py's `sensor` choices for the full sensor
-# list (voltage, current, active_power, etc.).
+# Prompted input:
+#   - inlet_number: inlet to configure (integer, 1-based)
+#   - sensor_name: sensor to threshold (string, default: voltage)
+#   - threshold_upper_warning: alert level (float, in sensor units)
+#   - threshold_upper_critical: alert level (float, in sensor units)
 
 - name: Set inlet sensor thresholds
   hosts: localhost

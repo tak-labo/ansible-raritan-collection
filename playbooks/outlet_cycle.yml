@@ -1,14 +1,20 @@
 ---
-# Power cycle a specific outlet (power off then on).
-# Note: state=cycle is always reported as changed=true because it is an action,
-# not a declarative state. It executes unconditionally every run.
+# Power cycle a specific outlet (power off then on with PDU's configured delay).
+#
+# Prompts for outlet number (1-based) and executes a power cycle action.
+# NOT idempotent: state=cycle is an imperative action that always reports changed=true
+# because it unconditionally executes the cycle, regardless of outlet state.
+#
+# The off-to-on interval is determined by the PDU's cycle_delay setting
+# (configure via pdu_config module; default ~10 seconds).
 #
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/outlet_cycle.yml
 #
-# You will be prompted for the outlet number.
+# Prompted input:
+#   - outlet_number: outlet to cycle (integer, 1-based)
 
 - name: Power cycle outlet
   hosts: localhost

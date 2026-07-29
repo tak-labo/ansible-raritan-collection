@@ -242,24 +242,171 @@ Note: Passphrases are write-only — not included in idempotency check (PDU does
 
 ## Playbooks
 
-Ready-to-use playbooks are in `playbooks/`.
-Copy `playbooks/vars.yml.example` to `playbooks/vars.yml`, fill in your PDU credentials, then run any playbook directly.
-
-| Playbook | Description |
-|---|---|
-| `playbooks/pdu_facts.yml` | Display PDU hardware info and current sensor readings |
-| `playbooks/outlet_on.yml` | Power on a specific outlet (prompted for outlet number) |
-| `playbooks/outlet_off.yml` | Power off a specific outlet (prompted for outlet number) |
-| `playbooks/outlet_cycle.yml` | Power cycle a specific outlet (prompted for outlet number) |
-| `playbooks/inlet_rename.yml` | Rename a specific inlet (prompted for inlet number and name) |
-| `playbooks/inlet_threshold.yml` | Set upper warning/critical thresholds on an inlet sensor (prompted) |
-| `playbooks/outlet_threshold.yml` | Set upper warning/critical thresholds on an outlet sensor (prompted) |
-| `playbooks/pdu_backup.yml` | Back up the PDU configuration to a local file |
-| `playbooks/monitoring_setup.yml` | Configure syslog action + SNMP trap action + event rule |
-| `playbooks/snmpv3_user.yml` | Create a user account with SNMPv3 auth_priv (prompted for username/password) |
+Ready-to-use playbooks are in `playbooks/`. Copy `playbooks/vars.yml.example` to `playbooks/vars.yml`, fill in your PDU credentials, then run any playbook directly.
 
 ```bash
 cp playbooks/vars.yml.example playbooks/vars.yml
+vi playbooks/vars.yml   # edit pdu_host, pdu_user, pdu_pass
 ansible-playbook playbooks/pdu_facts.yml
 ansible-playbook playbooks/outlet_on.yml
 ```
+
+### Playbook Reference
+
+#### pdu_facts.yml
+
+Display PDU hardware model, firmware version, and real-time sensor readings (inlet/outlet voltage, current, power).
+
+**Usage:**
+```bash
+ansible-playbook playbooks/pdu_facts.yml
+```
+
+**Output:** Facts registered as `pdu_info` (model, firmware) and `inlet_readings`, `outlet_readings` (voltage, current, active/apparent power, thresholds).
+
+---
+
+#### outlet_on.yml
+
+Power on a specific outlet. Prompts for outlet number (1-based).
+
+**Usage:**
+```bash
+ansible-playbook playbooks/outlet_on.yml
+# Prompted for: outlet_number
+```
+
+**Variables (in `playbooks/vars.yml`):**
+- `pdu_host` (required) — PDU IP/hostname
+- `pdu_user` (required) — PDU username
+- `pdu_pass` (required) — PDU password
+- `validate_certs` (optional, default: true) — Validate TLS certificate
+
+---
+
+#### outlet_off.yml
+
+Power off a specific outlet. Prompts for outlet number.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/outlet_off.yml
+# Prompted for: outlet_number
+```
+
+---
+
+#### outlet_cycle.yml
+
+Power cycle (off → on) a specific outlet. Prompts for outlet number.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/outlet_cycle.yml
+# Prompted for: outlet_number
+```
+
+**Note:** The PDU's cycle delay (`pdu_config.cycle_delay`) determines the off-to-on interval; default is ~10 seconds.
+
+---
+
+#### inlet_rename.yml
+
+Rename a specific inlet. Prompts for inlet number and new name.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/inlet_rename.yml
+# Prompted for: inlet_number, inlet_name
+```
+
+**Variables:**
+- `inlet_number` (prompted, 1-based)
+- `inlet_name` (prompted, max ~64 chars)
+
+---
+
+#### inlet_threshold.yml
+
+Set upper warning/critical alert thresholds on an inlet sensor. Prompts for inlet number, sensor type, and threshold values.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/inlet_threshold.yml
+# Prompted for: inlet_number, sensor (voltage/current/active_power/apparent_power/frequency/etc.)
+#              upper_warning, upper_critical
+```
+
+**Supported sensors:** See `inlet_config` module reference for the full `SENSOR_MAP` (voltage, current, active_power, apparent_power, frequency, power_factor, three_phase_apparent_power, three_phase_active_power, residual_current, neutral_current, total_power_factor, total_active_power, total_apparent_power, total_current).
+
+**Note:** Setting a threshold value automatically enables that threshold; use `unset_thresholds` in `inlet_config` to disable without losing the stored value.
+
+---
+
+#### outlet_threshold.yml
+
+Set upper warning/critical alert thresholds on an outlet sensor. Prompts for outlet number, sensor type, and threshold values.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/outlet_threshold.yml
+# Prompted for: outlet_number, sensor (voltage/current/active_power/apparent_power/power_factor)
+#              upper_warning, upper_critical
+```
+
+**Supported sensors:** See `outlet_config` module reference for `SENSOR_MAP` (voltage, current, active_power, apparent_power, power_factor, maximum_current, inrush_current).
+
+---
+
+#### pdu_backup.yml
+
+Download and save a PDU configuration backup locally. By default, generates a new timestamped file on each run (`changed=true` every time). Set `pdu_backup_filename` in `vars.yml` for a fixed filename (idempotent, `changed=false` when config hasn't drifted).
+
+**Usage:**
+```bash
+ansible-playbook playbooks/pdu_backup.yml
+# Default: writes timestamped file to ./backup/
+```
+
+**Variables (in `playbooks/vars.yml`):**
+- `pdu_backup_path` (optional, default: `./backup`) — Backup directory
+- `pdu_backup_filename` (optional, omit for timestamped) — Fixed filename for idempotent backups
+
+---
+
+#### monitoring_setup.yml
+
+Set up event logging: creates a syslog action, SNMP trap action, and event rule that fires on any event.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/monitoring_setup.yml
+```
+
+**Creates:**
+- Syslog action: sends event messages to a syslog server (prompts for server hostname/port)
+- SNMP trap action: sends event traps to a trap destination (prompts for host)
+- Event rule: triggers both actions on all events (`event_id: ["**"]`)
+
+**Variables (prompted or in `vars.yml`):**
+- `syslog_server` — Syslog server hostname/IP
+- `syslog_port` (default: 514) — Syslog UDP port
+- `snmp_trap_host` — SNMP trap destination hostname/IP
+- `snmp_trap_port` (default: 162) — SNMP trap UDP port
+
+---
+
+#### snmpv3_user.yml
+
+Create a user account with SNMPv3 auth_priv security (authentication + encryption). Prompts for username and password.
+
+**Usage:**
+```bash
+ansible-playbook playbooks/snmpv3_user.yml
+# Prompted for: target_user, new_password
+```
+
+**Configuration:**
+- Security level: `auth_priv` (auth protocol: SHA-1, priv protocol: AES-128)
+- Account password doubles as both authentication and privacy passphrase
+- PDU requires admin credentials (in `vars.yml`) to create accounts
