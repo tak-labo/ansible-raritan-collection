@@ -1,12 +1,17 @@
 ---
-# Rename a specific inlet.
+# Rename a specific inlet (sets the inlet's label/description).
+#
+# Prompts for inlet number (1-based) and a new name (up to ~64 characters).
+# Idempotent: if name is already set, reports changed=false.
 #
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/inlet_rename.yml
 #
-# You will be prompted for the inlet number and new name.
+# Prompted input:
+#   - inlet_number: inlet to rename (integer, 1-based)
+#   - inlet_name: new name (string, ~64 char limit)
 
 - name: Rename inlet
   hosts: localhost

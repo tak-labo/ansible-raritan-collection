@@ -1,12 +1,16 @@
 ---
 # Power on a specific outlet.
 #
+# Prompts for outlet number (1-based) and powers on that outlet.
+# Idempotent: if outlet is already on, reports changed=false.
+#
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/outlet_on.yml
 #
-# You will be prompted for the outlet number.
+# Prompted input:
+#   - outlet_number: outlet to power on (integer, 1-based)
 
 - name: Power on outlet
   hosts: localhost

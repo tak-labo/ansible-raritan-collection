@@ -1,16 +1,29 @@
 ---
-# Set upper warning/critical thresholds on a specific outlet sensor.
+# Set upper warning/critical alert thresholds on a specific outlet sensor.
+#
+# Prompts for outlet number, sensor type, and two threshold values.
+# Idempotent: if thresholds are already set, reports changed=false.
+#
+# Supported sensors: voltage, current, active_power, apparent_power, power_factor,
+# maximum_current, inrush_current
+# (see outlet_config module reference for units and defaults).
+#
+# Note: outlet sensors are a subset of inlet sensors; outlets lack the three-phase
+# and residual-current sensors inlets have, but add maximum_current and inrush_current.
+#
+# Setting a threshold automatically enables that threshold's alert.
+# To disable without losing the stored value, use outlet_config's unset_thresholds.
 #
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/outlet_threshold.yml
 #
-# You will be prompted for the outlet number, sensor, and threshold values.
-# See plugins/modules/outlet_config.py's `sensor` choices for the full sensor
-# list (voltage, current, active_power, etc.). Outlets don't have the
-# three-phase/residual-current sensors inlets do, but add maximum_current
-# and inrush_current.
+# Prompted input:
+#   - outlet_number: outlet to configure (integer, 1-based)
+#   - sensor_name: sensor to threshold (string, default: current)
+#   - threshold_upper_warning: alert level (float, in sensor units)
+#   - threshold_upper_critical: alert level (float, in sensor units)
 
 - name: Set outlet sensor thresholds
   hosts: localhost

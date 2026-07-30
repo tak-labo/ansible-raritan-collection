@@ -1,12 +1,16 @@
 ---
 # Power off a specific outlet.
 #
+# Prompts for outlet number (1-based) and powers off that outlet.
+# Idempotent: if outlet is already off, reports changed=false.
+#
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/outlet_off.yml
 #
-# You will be prompted for the outlet number.
+# Prompted input:
+#   - outlet_number: outlet to power off (integer, 1-based)
 
 - name: Power off outlet
   hosts: localhost

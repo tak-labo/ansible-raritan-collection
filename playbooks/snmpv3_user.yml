@@ -1,13 +1,23 @@
 ---
-# Create or update a PDU user account with SNMPv3 enabled.
-# Uses auth_priv security level with SHA-256 authentication and AES-128 encryption.
+# Create or update a PDU user account with SNMPv3 auth_priv enabled.
+#
+# Prompts for username and password, then creates or updates the account with:
+# - SNMPv3 security level: auth_priv (authentication + encryption)
+# - Authentication protocol: SHA-256
+# - Privacy protocol: AES-128
+# - Passphrase derivation: account password is used for both auth and priv
+#
+# Idempotent: if user exists with same credentials, reports changed=false.
+# Requires PDU admin credentials (in playbooks/vars.yml).
 #
 # Usage:
 #   cp playbooks/vars.yml.example playbooks/vars.yml
-#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass
+#   vi playbooks/vars.yml   # set pdu_host, pdu_user, pdu_pass, validate_certs
 #   ansible-playbook playbooks/snmpv3_user.yml
 #
-# You will be prompted for the target username and password.
+# Prompted input:
+#   - target_user: username to create (string)
+#   - new_password: account password (string, used as both auth and priv passphrase)
 
 - name: Create SNMPv3 user
   hosts: localhost
