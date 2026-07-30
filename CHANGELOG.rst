@@ -4,6 +4,14 @@ taklabo.raritan_xerus Release Notes
 
 .. contents:: Topics
 
+v1.1.2
+======
+
+Minor Changes
+-------------
+
+- Documentation: Restored quick-reference table for playbooks in README, matching the structure used for modules
+
 v1.1.1
 ======
 
