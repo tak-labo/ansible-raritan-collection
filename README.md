@@ -251,6 +251,19 @@ ansible-playbook playbooks/pdu_facts.yml
 ansible-playbook playbooks/outlet_on.yml
 ```
 
+| Playbook | Description |
+|---|---|
+| `playbooks/pdu_facts.yml` | Display PDU hardware info and current sensor readings |
+| `playbooks/outlet_on.yml` | Power on a specific outlet (prompted for outlet number) |
+| `playbooks/outlet_off.yml` | Power off a specific outlet (prompted for outlet number) |
+| `playbooks/outlet_cycle.yml` | Power cycle a specific outlet (prompted for outlet number) |
+| `playbooks/inlet_rename.yml` | Rename a specific inlet (prompted for inlet number and name) |
+| `playbooks/inlet_threshold.yml` | Set upper warning/critical thresholds on an inlet sensor (prompted) |
+| `playbooks/outlet_threshold.yml` | Set upper warning/critical thresholds on an outlet sensor (prompted) |
+| `playbooks/pdu_backup.yml` | Back up the PDU configuration to a local file |
+| `playbooks/monitoring_setup.yml` | Configure syslog action + SNMP trap action + event rule |
+| `playbooks/snmpv3_user.yml` | Create a user account with SNMPv3 auth_priv (prompted for username/password) |
+
 ### Playbook Reference
 
 #### pdu_facts.yml
