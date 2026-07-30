@@ -13,6 +13,20 @@ git push -u origin <feature-branch>
 gh pr create
 ```
 
+## Release Workflow
+
+1. **Update version** in `galaxy.yml` and `CHANGELOG.rst`
+2. **Create PR** with version bump (e.g., "chore: bump version to X.Y.Z and update changelog")
+3. **Merge PR** to main once CI passes
+4. **Create git tag**: `git tag vX.Y.Z && git push origin vX.Y.Z`
+5. **Build & publish**:
+   ```bash
+   uv run ansible-galaxy collection build
+   uv run ansible-galaxy collection publish taklabo-raritan_xerus-X.Y.Z.tar.gz
+   ```
+   (requires `~/.ansible/galaxy_token.yml` with Galaxy API token)
+6. **Create GitHub Release**: `gh release create vX.Y.Z --title vX.Y.Z --notes "..."`
+
 ## Commands
 
 ```bash
@@ -31,6 +45,13 @@ ANSIBLE_COLLECTIONS_PATH=/tmp/ansible_collections \
 ANSIBLE_COLLECTIONS_PATH=/tmp/ansible_collections \
   uv run ansible-playbook examples/integration_test.yml -e @examples/integration_test_vars.yml \
   --start-at-task "[dns_config] apply test settings"
+
+# Build and publish collection to Galaxy
+uv run ansible-galaxy collection build
+uv run ansible-galaxy collection publish taklabo-raritan_xerus-*.tar.gz
+
+# Create a GitHub release
+gh release create vX.Y.Z --title "vX.Y.Z" --notes "$(cat CHANGELOG.rst | sed -n '/^v[0-9.]*$/,/^v[0-9.]*$/p' | head -n -1)"
 ```
 
 After editing any module, copy it to the collection path before running integration tests:
