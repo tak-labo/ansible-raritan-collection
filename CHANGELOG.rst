@@ -4,6 +4,17 @@ taklabo.raritan_xerus Release Notes
 
 .. contents:: Topics
 
+v1.1.1
+======
+
+Minor Changes
+-------------
+
+- Documentation: Enhanced playbook and module_utils documentation for Galaxy and GitHub discoverability
+  - Expanded README Playbooks section with detailed usage, parameters, and notes for each playbook
+  - Added comprehensive header comments to all playbook files
+  - Added docstrings to ``plugins/module_utils/raritan_client.py``
+
 v1.1.0
 ======
 
