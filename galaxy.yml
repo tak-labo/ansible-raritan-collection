@@ -1,6 +1,6 @@
 namespace: taklabo
 name: raritan_xerus
-version: 1.1.1
+version: 1.1.2
 readme: README.md
 description: Ansible Collection for managing Raritan devices
 license:
